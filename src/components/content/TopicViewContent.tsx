@@ -2,9 +2,11 @@
 
 import { Subtopic } from '@/types';
 import { useNavigationStore } from '@/store/navigation-store';
+import { useProgressStore } from '@/store/progress-store';
+import { topics } from '@/data/topics';
 import {
   Lightbulb, BookOpen, GitBranch, Code2, AlertTriangle,
-  ArrowRight, ChevronRight, FlaskConical,
+  ArrowRight, ChevronRight, FlaskConical, Trophy, PartyPopper,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +29,44 @@ function SectionTitle({ icon: Icon, title }: { icon: React.ElementType; title: s
 
 export function TopicViewContent({ subtopic }: { subtopic: Subtopic }) {
   const { navigateToSubtopic } = useNavigationStore();
+  const completedSubtopics = useProgressStore(s => s.completedSubtopics);
+
+  // ─── Smart "What to study next" logic ───
+  // 1. Filter out already-completed topics from furtherReading
+  const uncompletedFurtherReading = subtopic.furtherReading.filter(
+    (item) => !completedSubtopics.includes(item.slug)
+  );
+
+  // 2. If all furtherReading items are completed, find the next uncompleted subtopic
+  //    First in the same category, then in subsequent categories
+  const currentCategoryIndex = topics.findIndex(c => c.slug === subtopic.categorySlug);
+  const currentCategory = topics[currentCategoryIndex];
+
+  // Collect uncompleted subtopics from current category (after current subtopic)
+  const currentSubtopicIndex = currentCategory?.subtopics.findIndex(s => s.slug === subtopic.slug) ?? -1;
+  const nextInCategory = currentCategory?.subtopics
+    .filter((s, i) => i > currentSubtopicIndex && !completedSubtopics.includes(s.slug))
+    ?? [];
+
+  // Collect uncompleted subtopics from subsequent categories
+  const nextCategories = topics
+    .slice(currentCategoryIndex + 1)
+    .flatMap(cat => cat.subtopics.filter(s => !completedSubtopics.includes(s.slug)));
+
+  // Final list: prefer filtered furtherReading, then next in category, then next categories
+  let nextTopics: { topic: string; slug: string; categorySlug: string }[] = [];
+
+  if (uncompletedFurtherReading.length > 0) {
+    nextTopics = uncompletedFurtherReading;
+  } else if (nextInCategory.length > 0) {
+    nextTopics = nextInCategory.map(s => ({ topic: s.title, slug: s.slug, categorySlug: s.categorySlug }));
+  } else if (nextCategories.length > 0) {
+    nextTopics = nextCategories.map(s => ({ topic: s.title, slug: s.slug, categorySlug: s.categorySlug }));
+  }
+
+  const allCompleted = nextTopics.length === 0;
+  // Whether we're suggesting from a different category (auto-transition)
+  const isDifferentCategory = nextTopics.length > 0 && nextTopics[0].categorySlug !== subtopic.categorySlug;
 
   return (
     <div className="space-y-8">
@@ -178,28 +218,53 @@ export function TopicViewContent({ subtopic }: { subtopic: Subtopic }) {
         </CardContent>
       </Card>
 
-      {/* Further Reading */}
-      <Card>
-        <CardHeader>
-          <SectionTitle icon={ArrowRight} title="Что изучать дальше" />
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {subtopic.furtherReading.map((item) => (
-              <Button
-                key={item.slug}
-                variant="outline"
-                size="sm"
-                onClick={() => navigateToSubtopic(item.categorySlug, item.slug)}
-                className="gap-1.5 text-base"
-              >
-                {item.topic}
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Further Reading — smart: only uncompleted topics, auto-transition to next category */}
+      {allCompleted ? (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-8 flex flex-col items-center gap-3 text-center">
+            <div className="p-3 rounded-full bg-primary/10">
+              <Trophy className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold">Все темы изучены!</h3>
+            <p className="text-muted-foreground max-w-md">
+              Поздравляем! Вы прошли все доступные темы на платформе. Вы отлично разбираетесь в Web Cache Deception.
+            </p>
+            <PartyPopper className="h-6 w-6 text-primary/60" />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <SectionTitle icon={ArrowRight} title={isDifferentCategory ? 'Следующий раздел' : 'Что изучать дальше'} />
+          </CardHeader>
+          <CardContent>
+            {isDifferentCategory && (
+              <p className="text-sm text-muted-foreground mb-3">
+                Все темы текущего раздела пройдены! Переходите к следующему:
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {nextTopics.map((item) => (
+                <Button
+                  key={item.slug}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateToSubtopic(item.categorySlug, item.slug)}
+                  className="gap-1.5 text-base"
+                >
+                  {item.topic}
+                  {item.categorySlug !== subtopic.categorySlug && (
+                    <Badge variant="secondary" className="text-xs ml-1">
+                      {topics.find(c => c.slug === item.categorySlug)?.title}
+                    </Badge>
+                  )}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
