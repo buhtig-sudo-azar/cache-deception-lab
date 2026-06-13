@@ -1,8 +1,7 @@
 'use client';
 
 import { useNavigationStore } from '@/store/navigation-store';
-import { useModelStore } from '@/store/model-store';
-import { Menu, Shield, Moon, Sun } from 'lucide-react';
+import { Menu, Shield, Moon, Sun, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ModelSelector } from '@/components/settings/ModelSelector';
 import { useTheme } from 'next-themes';
@@ -19,14 +18,20 @@ function useMounted() {
 }
 
 export function Header() {
-  const { toggleSidebar } = useNavigationStore();
+  const { sidebarOpen, sidebarCollapsed, toggleSidebar } = useNavigationStore();
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
 
   return (
     <header className="h-14 border-b border-border flex items-center gap-3 px-3 shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleSidebar}>
-        <Menu className="h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={toggleSidebar}
+        title={sidebarOpen ? 'Свернуть панель' : 'Развернуть панель'}
+      >
+        {sidebarOpen ? <PanelLeft className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </Button>
 
       <div className="flex items-center gap-2 flex-1 min-w-0">

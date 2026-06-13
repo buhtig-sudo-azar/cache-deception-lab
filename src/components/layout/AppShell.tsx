@@ -26,9 +26,9 @@ export function AppShell() {
   }, [currentView, currentCategory, currentSubtopic]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         <Sidebar />
         <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col min-w-0">
           <Breadcrumbs />
