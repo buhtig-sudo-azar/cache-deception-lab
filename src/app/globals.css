@@ -119,4 +119,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Smooth scrolling for the main scroll container */
+  main {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
 }

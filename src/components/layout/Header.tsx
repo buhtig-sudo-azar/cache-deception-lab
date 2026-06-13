@@ -23,7 +23,7 @@ export function Header() {
   const mounted = useMounted();
 
   return (
-    <header className="h-14 border-b border-border flex items-center gap-3 px-3 shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+    <header className="h-14 border-b border-border flex items-center gap-3 px-3 shrink-0 bg-background z-50">
       <Button
         variant="ghost"
         size="icon"

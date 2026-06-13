@@ -30,7 +30,7 @@ export function AppShell() {
       <Header />
       <div className="flex flex-1 overflow-hidden min-h-0">
         <Sidebar />
-        <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col min-w-0">
+        <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col min-w-0" style={{ willChange: 'scroll-position' }}>
           <Breadcrumbs />
           <div className="flex-1">
             {currentView === 'home' && <HomeView />}
@@ -41,7 +41,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <ScrollToTopButton />
+      <ScrollToTopButton scrollContainerRef={mainRef} />
       <AgentChatPopup />
       <SearchDialog />
     </div>

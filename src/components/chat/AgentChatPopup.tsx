@@ -79,7 +79,7 @@ export function AgentChatPopup() {
           className="group relative focus:outline-none"
           title="Открыть ИИ-наставника"
         >
-          <span className={`absolute -inset-1.5 rounded-full bg-gradient-to-br ${currentAgent.gradient} opacity-40 group-hover:opacity-70 transition-opacity animate-pulse`} />
+          <span className={`absolute -inset-1.5 rounded-full bg-gradient-to-br ${currentAgent.gradient} opacity-40 group-hover:opacity-70 transition-opacity`} />
           <span className="relative flex items-center justify-center w-14 h-14 rounded-full border-2 border-background shadow-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
             <MessageCircle className="h-6 w-6" />
           </span>

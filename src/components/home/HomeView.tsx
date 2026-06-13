@@ -6,11 +6,24 @@ import { useProgressStore } from '@/store/progress-store';
 import {
   Server, Key, Shield, Swords, Scissors, Route, Shrink, FileText, ShieldCheck,
   ArrowRight, Sparkles, BookOpen, MessageCircle, Cpu, KeyRound, HelpCircle, Trophy, Flame,
+  RotateCcw,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const iconMap: Record<string, React.ElementType> = {
   Server, Key, Shield, Swords, Scissors, Route, Shrink, FileText, ShieldCheck,
@@ -32,19 +45,34 @@ export function HomeView() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-12"
+        className="relative mb-12 rounded-2xl overflow-hidden"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-base font-semibold mb-6">
-          <Sparkles className="h-4 w-4" />
-          Интерактивная обучающая платформа
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-banner.png"
+            alt="Cache Deception Lab"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
         </div>
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-5">
-          Cache Deception{' '}
-          <span className="text-primary">Lab</span>
-        </h1>
-        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Web Cache Deception — интерактивная лаборатория: от основ кэширования до продвинутых техник атаки и защиты по PortSwigger.
-        </p>
+
+        {/* Content overlay */}
+        <div className="relative text-center py-12 sm:py-16 md:py-20 px-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 backdrop-blur-sm text-primary text-base font-semibold mb-6 border border-primary/20">
+            <Sparkles className="h-4 w-4" />
+            Интерактивная обучающая платформа
+          </div>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-5">
+            Cache Deception{' '}
+            <span className="text-primary">Lab</span>
+          </h1>
+          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Web Cache Deception — интерактивная лаборатория: от основ кэширования до продвинутых техник атаки и защиты по PortSwigger.
+          </p>
+        </div>
       </motion.div>
 
       {/* Stats */}
@@ -52,27 +80,59 @@ export function HomeView() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="mb-10 grid grid-cols-2 sm:grid-cols-4 gap-4"
+        className="mb-10"
       >
-        <div className="p-4 rounded-lg border border-border bg-card text-center">
-          <Trophy className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-2xl font-bold">{level}</p>
-          <p className="text-xs text-muted-foreground">Уровень</p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">Ваш прогресс</h2>
+          {overallProgress > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Сбросить прогресс
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Сбросить прогресс?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Все просмотренные и изученные темы будут отмечены как непройденные. XP, уровень и серия будут обнулены.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => useProgressStore.getState().resetProgress()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Сбросить
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
-        <div className="p-4 rounded-lg border border-border bg-card text-center">
-          <Sparkles className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-2xl font-bold">{xp}</p>
-          <p className="text-xs text-muted-foreground">XP</p>
-        </div>
-        <div className="p-4 rounded-lg border border-border bg-card text-center">
-          <Flame className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-2xl font-bold">{streak}</p>
-          <p className="text-xs text-muted-foreground">Серия</p>
-        </div>
-        <div className="p-4 rounded-lg border border-border bg-card text-center">
-          <BookOpen className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-2xl font-bold">{completedCount}/{totalSubtopics}</p>
-          <p className="text-xs text-muted-foreground">Изучено</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="p-4 rounded-lg border border-border bg-card text-center">
+            <Trophy className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{level}</p>
+            <p className="text-xs text-muted-foreground">Уровень</p>
+          </div>
+          <div className="p-4 rounded-lg border border-border bg-card text-center">
+            <Sparkles className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{xp}</p>
+            <p className="text-xs text-muted-foreground">XP</p>
+          </div>
+          <div className="p-4 rounded-lg border border-border bg-card text-center">
+            <Flame className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{streak}</p>
+            <p className="text-xs text-muted-foreground">Серия</p>
+          </div>
+          <div className="p-4 rounded-lg border border-border bg-card text-center">
+            <BookOpen className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{completedCount}/{totalSubtopics}</p>
+            <p className="text-xs text-muted-foreground">Изучено</p>
+          </div>
         </div>
       </motion.div>
 
@@ -144,7 +204,7 @@ export function HomeView() {
               transition={{ delay: 0.1 * i, duration: 0.4 }}
             >
               <Card
-                className="cursor-pointer group hover:border-primary/50 transition-all hover:shadow-md h-full"
+                className="cursor-pointer group hover:border-primary/50 transition-colors hover:shadow-md h-full"
                 onClick={() => navigateToCategory(category.slug)}
               >
                 <CardContent className="p-6">
