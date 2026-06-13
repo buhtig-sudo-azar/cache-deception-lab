@@ -10,6 +10,7 @@ export function Footer() {
         <span>Cache Deception Lab — Интерактивная лаборатория по Web Cache Deception</span>
       </div>
       <p className="mt-0.5 text-muted-foreground/50">На основе материалов PortSwigger Web Security Academy</p>
+      <p className="mt-0.5 text-muted-foreground/40">Создатель AZAR</p>
     </footer>
   );
 }
