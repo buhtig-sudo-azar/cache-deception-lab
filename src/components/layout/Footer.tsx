@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-border px-4 py-3 text-center text-xs text-muted-foreground mt-auto">
       <div className="flex items-center justify-center gap-1.5">
         <Shield className="h-3.5 w-3.5 text-primary" />
-        <span>WCD Academy — Образовательная платформа по Web Cache Deception</span>
+        <span>Cache Deception Lab — Интерактивная лаборатория по Web Cache Deception</span>
       </div>
       <p className="mt-0.5 text-muted-foreground/50">На основе материалов PortSwigger Web Security Academy</p>
     </footer>

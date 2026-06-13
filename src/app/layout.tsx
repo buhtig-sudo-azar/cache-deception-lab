@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WCD Academy — Web Cache Deception",
-  description: "Интерактивная образовательная платформа для изучения Web Cache Deception по материалам PortSwigger Web Security Academy",
-  keywords: ["WCD", "Web Cache Deception", "Cache Security", "PortSwigger", "Cybersecurity", "Обучение"],
+  title: "Cache Deception Lab — Web Cache Deception",
+  description: "Интерактивная лаборатория для изучения Web Cache Deception: 9 модулей, ИИ-наставники, песочницы и геймификация по материалам PortSwigger",
+  keywords: ["WCD", "Web Cache Deception", "Cache Security", "Cache Poisoning", "PortSwigger", "Cybersecurity", "CDN", "Обучение"],
   icons: {
     icon: "/favicon.png",
   },

@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
-const STORAGE_KEY = 'wcd-academy-model';
-const RATE_LIMIT_KEY = 'wcd-academy-rate-limits';
-const TOKEN_KEY = 'wcd-academy-api-token';
+const STORAGE_KEY = 'cache-deception-lab-model';
+const RATE_LIMIT_KEY = 'cache-deception-lab-rate-limits';
+const TOKEN_KEY = 'cache-deception-lab-api-token';
 
 const DEFAULT_MODEL = 'moonshotai/kimi-k2.6:free';
 

@@ -31,7 +31,7 @@ export function Header() {
 
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <Shield className="h-5 w-5 text-primary shrink-0" />
-        <span className="font-bold text-base truncate">WCD Academy</span>
+        <span className="font-bold text-base truncate">Cache Deception Lab</span>
         <span className="text-xs text-muted-foreground hidden sm:inline">Web Cache Deception</span>
       </div>
 

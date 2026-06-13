@@ -39,11 +39,11 @@ export function HomeView() {
           Интерактивная обучающая платформа
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-5">
-          WCD{' '}
-          <span className="text-primary">Academy</span>
+          Cache Deception{' '}
+          <span className="text-primary">Lab</span>
         </h1>
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Web Cache Deception — от новичка до мастера. Изучите все техники атаки и защиты по материалам PortSwigger.
+          Web Cache Deception — интерактивная лаборатория: от основ кэширования до продвинутых техник атаки и защиты по PortSwigger.
         </p>
       </motion.div>
 

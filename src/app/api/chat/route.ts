@@ -104,8 +104,8 @@ export async function POST(req: NextRequest) {
             headers: {
               Authorization: `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
-              'HTTP-Referer': 'https://wcd-academy.app',
-              'X-Title': 'WCD Academy',
+              'HTTP-Referer': 'https://cache-deception-lab.app',
+              'X-Title': 'Cache Deception Lab',
             },
             body: JSON.stringify({
               model,

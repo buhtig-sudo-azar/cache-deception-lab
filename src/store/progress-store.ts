@@ -19,7 +19,7 @@ interface ProgressState {
   _hydrate: () => void;
 }
 
-const STORAGE_KEY = 'wcd-academy-progress';
+const STORAGE_KEY = 'cache-deception-lab-progress';
 
 function loadFromStorage(): Pick<ProgressState, 'viewedSubtopics' | 'completedSubtopics' | 'xp' | 'level' | 'streak' | 'lastActiveDate'> {
   if (typeof window === 'undefined') return { viewedSubtopics: [], completedSubtopics: [], xp: 0, level: 1, streak: 0, lastActiveDate: null };

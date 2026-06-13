@@ -10,7 +10,7 @@ import { CategoryView } from '@/components/content/CategoryView';
 import { TopicView } from '@/components/content/TopicView';
 import { AgentChatPopup } from '@/components/chat/AgentChatPopup';
 import { SearchDialog } from '@/components/search/SearchDialog';
-import { FloatingDock } from './FloatingDock';
+import { ScrollToTopButton } from './ScrollToTopButton';
 import { useEffect, useRef } from 'react';
 
 export function AppShell() {
@@ -41,7 +41,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <FloatingDock />
+      <ScrollToTopButton />
       <AgentChatPopup />
       <SearchDialog />
     </div>
