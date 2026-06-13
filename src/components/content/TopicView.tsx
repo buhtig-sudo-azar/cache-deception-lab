@@ -5,12 +5,11 @@ import { useNavigationStore } from '@/store/navigation-store';
 import { useProgressStore } from '@/store/progress-store';
 import { TopicViewContent } from './TopicViewContent';
 import { CheckCircle2, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 export function TopicView() {
   const { currentCategory, currentSubtopic, navigateToCategory } = useNavigationStore();
-  const { markAsViewed, markAsCompleted, isCompleted } = useProgressStore();
+  const { markAsViewed, isCompleted } = useProgressStore();
 
   const category = topics.find(t => t.slug === currentCategory);
   const subtopic = category?.subtopics.find(s => s.slug === currentSubtopic);
@@ -49,22 +48,6 @@ export function TopicView() {
       </div>
 
       <TopicViewContent subtopic={subtopic} />
-
-      <div className="mt-8 pt-6 border-t border-border">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          <Button
-            onClick={() => markAsCompleted(subtopic.slug)}
-            variant={completed ? 'outline' : 'default'}
-            className="gap-2"
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            {completed ? 'Изучено ✓' : 'Отметить как изученное'}
-          </Button>
-          <span className="text-base text-muted-foreground">
-            {completed ? 'Вы уже изучили эту тему' : 'Нажмите, когда завершите изучение темы (+50 XP)'}
-          </span>
-        </div>
-      </div>
     </motion.div>
   );
 }
