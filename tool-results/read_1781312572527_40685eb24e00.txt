@@ -1,0 +1,761 @@
+     1→import { TopicCategory } from '@/types';
+     2→
+     3→export const topics: TopicCategory[] = [
+     4→  {
+     5→    slug: 'web-security-basics',
+     6→    title: 'Web Security Basics',
+     7→    description: 'Foundational concepts of web security: threats, defense principles, and the security mindset',
+     8→    iconName: 'Shield',
+     9→    subtopics: [
+    10→      {
+    11→        slug: 'security-landscape',
+    12→        title: 'The Security Landscape',
+    13→        categorySlug: 'web-security-basics',
+    14→        introduction: {
+    15→          what: 'The web security landscape encompasses all threats, vulnerabilities, and defense mechanisms that apply to web applications and services running over HTTP/HTTPS protocols.',
+    16→          why: 'Understanding the security landscape is essential because every web application is a potential target. Attackers continuously evolve their methods, and developers must stay informed to build resilient systems.',
+    17→          where: 'Security considerations apply to every web project — from simple landing pages to complex SaaS platforms, APIs, and microservices architectures.',
+    18→          problem: 'Many developers treat security as an afterthought, leading to vulnerabilities that could have been prevented with basic awareness and secure coding practices from the start.',
+    19→        },
+    20→        theory: {
+    21→          terms: [
+    22→            { term: 'Threat Agent', definition: 'Any entity that can potentially cause harm to a system — hackers, malicious insiders, automated bots, or even natural disasters.' },
+    23→            { term: 'Attack Surface', definition: 'The total sum of all points where an unauthorized user can attempt to enter or extract data from a system.' },
+    24→            { term: 'Defense in Depth', definition: 'A security strategy that employs multiple layers of defensive controls so that if one fails, others still provide protection.' },
+    25→          ],
+    26→          principles: 'Security is a continuous process, not a one-time checklist. The principle of least privilege, defense in depth, and fail-safe defaults form the foundation of web security.',
+    27→          architecture: 'Security architecture spans network perimeter (firewalls, WAFs), application layer (input validation, authentication), and data layer (encryption, access controls).',
+    28→          connections: 'Web security basics connect to authentication (how users prove identity), secure coding (how to write safe code), and common vulnerabilities (what attacks look like).',
+    29→        },
+    30→        diagram: {
+    31→          type: 'architecture',
+    32→          title: 'Defense in Depth Layers',
+    33→          svgContent: '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="30" width="300" height="240" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><rect x="90" y="60" width="220" height="180" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><rect x="130" y="90" width="140" height="120" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/><rect x="160" y="120" width="80" height="60" rx="4" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/><text x="200" y="25" text-anchor="middle" font-size="12" fill="#92400e">Network Layer</text><text x="200" y="55" text-anchor="middle" font-size="11" fill="#1e40af">Application Layer</text><text x="200" y="85" text-anchor="middle" font-size="10" fill="#166534">Service Layer</text><text x="200" y="155" text-anchor="middle" font-size="9" fill="#9d174d">Data Layer</text></svg>',
+    34→        },
+    35→        practicalExamples: [
+    36→          {
+    37→            title: 'Analyzing Attack Surfaces',
+    38→            description: 'Map the attack surface of a typical web application by identifying all input vectors, API endpoints, and data flows.',
+    39→          },
+    40→        ],
+    41→        commonMistakes: [
+    42→          {
+    43→            mistake: 'Trusting client-side validation alone',
+    44→            explanation: 'Client-side validation can be bypassed easily by modifying requests.',
+    45→            correctApproach: 'Always validate and sanitize input on the server side, treating client-side validation as a UX improvement only.',
+    46→          },
+    47→        ],
+    48→        furtherReading: [
+    49→          { topic: 'Authentication & Authorization', slug: 'auth-basics', categorySlug: 'authentication-authorization' },
+    50→          { topic: 'Common Vulnerabilities', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+    51→        ],
+    52→      },
+    53→      {
+    54→        slug: 'threat-modeling',
+    55→        title: 'Threat Modeling',
+    56→        categorySlug: 'web-security-basics',
+    57→        introduction: {
+    58→          what: 'Threat modeling is a systematic approach to identifying, quantifying, and addressing security threats to a system through structured analysis.',
+    59→          why: 'It helps teams prioritize security efforts by understanding which threats are most likely and most impactful, enabling efficient resource allocation.',
+    60→          where: 'Threat modeling should be performed during the design phase of any new system or feature, and revisited as the system evolves.',
+    61→          problem: 'Without threat modeling, security efforts are often reactive and scattered, addressing only known vulnerabilities rather than anticipating potential attack vectors.',
+    62→        },
+    63→        theory: {
+    64→          terms: [
+    65→            { term: 'STRIDE', definition: 'A threat classification model: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege.' },
+    66→            { term: 'Data Flow Diagram', definition: 'A visual representation of how data moves through a system, showing processes, data stores, and external entities.' },
+    67→            { term: 'Trust Boundary', definition: 'A line on a data flow diagram where data changes trust level — crossing from trusted to untrusted territory or vice versa.' },
+    68→          ],
+    69→          principles: 'Threat modeling follows a structured process: define the system, identify threats, assess risks, and implement mitigations.',
+    70→          architecture: 'Use DFDs to map system components, data flows, and trust boundaries. Apply STRIDE to identify threat categories at each boundary.',
+    71→          connections: 'Threat modeling directly informs secure coding practices, helps identify common vulnerabilities, and guides the design of authentication and authorization systems.',
+    72→        },
+    73→        diagram: {
+    74→          type: 'flowchart',
+    75→          title: 'Threat Modeling Process',
+    76→          svgContent: '<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="60" width="80" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/><text x="50" y="84" text-anchor="middle" font-size="10" fill="#1e40af">Define</text><line x1="90" y1="80" x2="110" y2="80" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="110" y="60" width="80" height="40" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/><text x="150" y="84" text-anchor="middle" font-size="10" fill="#166534">Identify</text><line x1="190" y1="80" x2="210" y2="80" stroke="#6b7280" stroke-width="1.5"/><rect x="210" y="60" width="80" height="40" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/><text x="250" y="84" text-anchor="middle" font-size="10" fill="#92400e">Assess</text><line x1="290" y1="80" x2="310" y2="80" stroke="#6b7280" stroke-width="1.5"/><rect x="310" y="60" width="80" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/><text x="350" y="84" text-anchor="middle" font-size="10" fill="#9d174d">Mitigate</text><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/></marker></defs></svg>',
+    77→        },
+    78→        practicalExamples: [
+    79→          {
+    80→            title: 'STRIDE Analysis for a Login Page',
+    81→            description: 'Apply the STRIDE model to analyze threats against a typical login form and design appropriate countermeasures.',
+    82→          },
+    83→        ],
+    84→        commonMistakes: [
+    85→          {
+    86→            mistake: 'Performing threat modeling only once',
+    87→            explanation: 'Systems evolve, and new threats emerge constantly.',
+    88→            correctApproach: 'Make threat modeling a recurring activity, revisiting it with each major change or on a regular schedule.',
+    89→          },
+    90→        ],
+    91→        furtherReading: [
+    92→          { topic: 'Common Vulnerabilities', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+    93→        ],
+    94→      },
+    95→      {
+    96→        slug: 'security-principles',
+    97→        title: 'Core Security Principles',
+    98→        categorySlug: 'web-security-basics',
+    99→        introduction: {
+   100→          what: 'Core security principles are fundamental rules and guidelines that inform all security decisions, including least privilege, defense in depth, and fail-safe defaults.',
+   101→          why: 'These principles provide a consistent framework for making security decisions, ensuring that protection is systematic rather than ad-hoc.',
+   102→          where: 'They apply to every aspect of system design and implementation — from network configuration to code-level access controls.',
+   103→          problem: 'Without grounding in core principles, security implementations tend to be inconsistent, leaving gaps that attackers can exploit.',
+   104→        },
+   105→        theory: {
+   106→          terms: [
+   107→            { term: 'Least Privilege', definition: 'Granting only the minimum access rights necessary for a user or process to perform its function.' },
+   108→            { term: 'Fail-Safe Defaults', definition: 'Designing systems so that the default state denies access — access must be explicitly granted.' },
+   109→            { term: 'Separation of Duties', definition: 'Ensuring that no single person has complete control over a critical process, requiring collusion for fraud.' },
+   110→          ],
+   111→          principles: 'The CIA triad (Confidentiality, Integrity, Availability) is the foundation. Every security control should support at least one of these objectives.',
+   112→          architecture: 'Security principles are implemented through technical controls (encryption, access control lists), administrative controls (policies, procedures), and physical controls (locked doors, surveillance).',
+   113→          connections: 'Core principles underpin authentication design, secure coding practices, and vulnerability prevention strategies.',
+   114→        },
+   115→        diagram: {
+   116→          type: 'comparison',
+   117→          title: 'CIA Triad',
+   118→          svgContent: '<svg viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg"><polygon points="150,30 270,200 30,200" fill="none" stroke="#6b7280" stroke-width="2"/><text x="150" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#3b82f6">Confidentiality</text><text x="275" y="210" text-anchor="middle" font-size="13" font-weight="bold" fill="#22c55e">Integrity</text><text x="25" y="210" text-anchor="middle" font-size="13" font-weight="bold" fill="#f59e0b">Availability</text><circle cx="150" cy="150" r="25" fill="#f3f4f6" stroke="#6b7280" stroke-width="1"/><text x="150" y="154" text-anchor="middle" font-size="10" fill="#374151">Security</text></svg>',
+   119→        },
+   120→        practicalExamples: [
+   121→          {
+   122→            title: 'Implementing Least Privilege in a Web App',
+   123→            description: 'Design a role-based access control system where each role has the minimum permissions needed for its responsibilities.',
+   124→          },
+   125→        ],
+   126→        commonMistakes: [
+   127→          {
+   128→            mistake: 'Running services as root/admin',
+   129→            explanation: 'If a service is compromised, the attacker gains full system access.',
+   130→            correctApproach: 'Run each service under a dedicated low-privilege account with only the permissions it needs.',
+   131→          },
+   132→        ],
+   133→        furtherReading: [
+   134→          { topic: 'Authentication & Authorization', slug: 'auth-basics', categorySlug: 'authentication-authorization' },
+   135→        ],
+   136→      },
+   137→    ],
+   138→  },
+   139→  {
+   140→    slug: 'authentication-authorization',
+   141→    title: 'Authentication & Authorization',
+   142→    description: 'Identity verification, access control, session management, and modern auth protocols',
+   143→    iconName: 'Key',
+   144→    subtopics: [
+   145→      {
+   146→        slug: 'auth-basics',
+   147→        title: 'Authentication Fundamentals',
+   148→        categorySlug: 'authentication-authorization',
+   149→        introduction: {
+   150→          what: 'Authentication is the process of verifying that a user or system is who they claim to be, typically through credentials like passwords, tokens, or biometrics.',
+   151→          why: 'Without authentication, anyone can access any resource, making it impossible to enforce access controls or maintain accountability.',
+   152→          where: 'Authentication is required at every entry point — login forms, API endpoints, service-to-service communication, and administrative interfaces.',
+   153→          problem: 'Weak authentication is the most common entry point for breaches. Password reuse, weak credentials, and improper session management expose systems to attack.',
+   154→        },
+   155→        theory: {
+   156→          terms: [
+   157→            { term: 'MFA', definition: 'Multi-Factor Authentication requires two or more verification factors: something you know (password), something you have (phone), or something you are (fingerprint).' },
+   158→            { term: 'JWT', definition: 'JSON Web Token — a compact, self-contained token for securely transmitting information between parties as a JSON object.' },
+   159→            { term: 'Session', definition: 'A server-side record of an authenticated user, typically identified by a session cookie, storing user state and authentication information.' },
+   160→          ],
+   161→          principles: 'Authentication should use proven protocols and libraries, never roll your own crypto. Always implement MFA for sensitive operations.',
+   162→          architecture: 'Modern auth flows involve identity providers, token services, and resource servers. OAuth 2.0 and OpenID Connect are the dominant protocols.',
+   163→          connections: 'Authentication enables authorization decisions, supports audit trails, and connects to secure coding practices for credential handling.',
+   164→        },
+   165→        diagram: {
+   166→          type: 'flowchart',
+   167→          title: 'OAuth 2.0 Authorization Code Flow',
+   168→          svgContent: '<svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="20" width="80" height="30" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="50" y="40" text-anchor="middle" font-size="9" fill="#1e40af">Client</text><rect x="160" y="20" width="80" height="30" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="200" y="40" text-anchor="middle" font-size="9" fill="#166534">Auth Server</text><rect x="310" y="20" width="80" height="30" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="350" y="40" text-anchor="middle" font-size="9" fill="#92400e">Resource</text><line x1="90" y1="35" x2="160" y2="35" stroke="#3b82f6" stroke-width="1.5"/><text x="125" y="30" text-anchor="middle" font-size="7" fill="#3b82f6">1. Auth Request</text><line x1="160" y1="55" x2="90" y2="55" stroke="#22c55e" stroke-width="1.5"/><text x="125" y="68" text-anchor="middle" font-size="7" fill="#22c55e">2. Auth Code</text><line x1="90" y1="90" x2="160" y2="90" stroke="#3b82f6" stroke-width="1.5"/><text x="125" y="85" text-anchor="middle" font-size="7" fill="#3b82f6">3. Code + Secret</text><line x1="160" y1="110" x2="90" y2="110" stroke="#22c55e" stroke-width="1.5"/><text x="125" y="123" text-anchor="middle" font-size="7" fill="#22c55e">4. Access Token</text><line x1="90" y1="140" x2="310" y2="140" stroke="#3b82f6" stroke-width="1.5"/><text x="200" y="135" text-anchor="middle" font-size="7" fill="#3b82f6">5. API Request + Token</text><line x1="310" y1="160" x2="90" y2="160" stroke="#f59e0b" stroke-width="1.5"/><text x="200" y="173" text-anchor="middle" font-size="7" fill="#92400e">6. Protected Data</text></svg>',
+   169→        },
+   170→        practicalExamples: [
+   171→          {
+   172→            title: 'Implementing JWT Authentication',
+   173→            description: 'Build a complete JWT-based authentication system with access tokens, refresh tokens, and proper token validation.',
+   174→            code: `// Token generation\nconst token = jwt.sign(\n  { userId: user.id, role: user.role },\n  process.env.JWT_SECRET,\n  { expiresIn: '15m' }\n);`,
+   175→            language: 'typescript',
+   176→          },
+   177→        ],
+   178→        commonMistakes: [
+   179→          {
+   180→            mistake: 'Storing JWTs in localStorage',
+   181→            explanation: 'localStorage is vulnerable to XSS attacks, allowing token theft.',
+   182→            correctApproach: 'Store tokens in httpOnly, Secure, SameSite cookies to prevent JavaScript access and CSRF attacks.',
+   183→          },
+   184→        ],
+   185→        furtherReading: [
+   186→          { topic: 'Secure Coding', slug: 'input-validation', categorySlug: 'secure-coding' },
+   187→        ],
+   188→      },
+   189→      {
+   190→        slug: 'session-management',
+   191→        title: 'Session Management',
+   192→        categorySlug: 'authentication-authorization',
+   193→        introduction: {
+   194→          what: 'Session management is the process of securely handling user sessions after authentication, including session creation, maintenance, and termination.',
+   195→          why: 'Poor session management allows attackers to hijack active sessions, impersonate users, and bypass authentication entirely.',
+   196→          where: 'Sessions must be managed in web applications, APIs, SPAs, and mobile backends — anywhere users maintain authenticated state.',
+   197→          problem: 'Session fixation, session hijacking, and improper session expiration are among the most exploited web vulnerabilities.',
+   198→        },
+   199→        theory: {
+   200→          terms: [
+   201→            { term: 'Session ID', definition: 'A unique identifier assigned to a user session, typically stored in a cookie, used to look up session data on the server.' },
+   202→            { term: 'Session Fixation', definition: 'An attack where the attacker sets the victim\'s session ID before authentication, allowing the attacker to use the same session afterward.' },
+   203→            { term: 'CSRF Token', definition: 'A unique, unpredictable value included in each request to verify that the request originates from the legitimate application.' },
+   204→          ],
+   205→          principles: 'Always regenerate session IDs after authentication, use secure cookie attributes, and implement proper session expiration policies.',
+   206→          architecture: 'Sessions can be stored server-side (database, cache) or client-side (signed JWT tokens). Each approach has different security tradeoffs.',
+   207→          connections: 'Session management depends on authentication and enables authorization. It connects to secure coding for cookie handling and CSRF prevention.',
+   208→        },
+   209→        diagram: {
+   210→          type: 'flowchart',
+   211→          title: 'Session Lifecycle',
+   212→          svgContent: '<svg viewBox="0 0 350 120" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="35" width="70" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="40" y="56" text-anchor="middle" font-size="8" fill="#1e40af">Create</text><line x1="75" y1="52" x2="95" y2="52" stroke="#6b7280" stroke-width="1"/><rect x="95" y="35" width="70" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="130" y="56" text-anchor="middle" font-size="8" fill="#166534">Validate</text><line x1="165" y1="52" x2="185" y2="52" stroke="#6b7280" stroke-width="1"/><rect x="185" y="35" width="70" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="220" y="56" text-anchor="middle" font-size="8" fill="#92400e">Active</text><line x1="255" y1="52" x2="275" y2="52" stroke="#6b7280" stroke-width="1"/><rect x="275" y="35" width="70" height="35" rx="4" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="310" y="56" text-anchor="middle" font-size="8" fill="#991b1b">Destroy</text></svg>',
+   213→        },
+   214→        practicalExamples: [
+   215→          {
+   216→            title: 'Secure Session Configuration',
+   217→            description: 'Configure session cookies with all security attributes: httpOnly, Secure, SameSite, and proper expiration.',
+   218→            code: `// Express.js session config\napp.use(session({\n  secret: process.env.SESSION_SECRET,\n  cookie: {\n    httpOnly: true,\n    secure: true,\n    sameSite: 'strict',\n    maxAge: 3600000 // 1 hour\n  },\n  resave: false,\n  saveUninitialized: false\n}));`,
+   219→            language: 'typescript',
+   220→          },
+   221→        ],
+   222→        commonMistakes: [
+   223→          {
+   224→            mistake: 'Not regenerating session IDs after login',
+   225→            explanation: 'This enables session fixation attacks where an attacker pre-sets the session ID.',
+   226→            correctApproach: 'Always call session regeneration after successful authentication to create a new, unpredictable session ID.',
+   227→          },
+   228→        ],
+   229→        furtherReading: [
+   230→          { topic: 'Core Security Principles', slug: 'security-principles', categorySlug: 'web-security-basics' },
+   231→        ],
+   232→      },
+   233→    ],
+   234→  },
+   235→  {
+   236→    slug: 'version-control',
+   237→    title: 'Version Control',
+   238→    description: 'Git workflows, branching strategies, and secure collaboration practices for development teams',
+   239→    iconName: 'GitBranch',
+   240→    subtopics: [
+   241→      {
+   242→        slug: 'git-basics',
+   243→        title: 'Git Essentials for Security',
+   244→        categorySlug: 'version-control',
+   245→        introduction: {
+   246→          what: 'Git version control with a security focus: managing secrets, reviewing changes, and maintaining audit trails in code repositories.',
+   247→          why: 'Version control is the backbone of secure development — it provides accountability, enables code review, and helps prevent secrets from leaking.',
+   248→          where: 'Every development team should use version control for all code, configuration, and infrastructure definitions.',
+   249→          problem: 'Secrets committed to Git, unreviewed code changes, and improper branch protections are common sources of security incidents.',
+   250→        },
+   251→        theory: {
+   252→          terms: [
+   253→            { term: 'Git Hooks', definition: 'Scripts that run automatically at specific points in Git workflows, useful for enforcing security policies before commits or pushes.' },
+   254→            { term: 'Pre-commit Scan', definition: 'Automated scanning of staged changes for secrets, credentials, or sensitive data before they are committed to the repository.' },
+   255→            { term: 'Branch Protection', definition: 'Repository rules that enforce code review, status checks, and other requirements before code can be merged into protected branches.' },
+   256→          ],
+   257→          principles: 'Never commit secrets. Always require code review. Use branch protection on main/release branches. Maintain a clear audit trail of all changes.',
+   258→          architecture: 'Secure Git workflows combine pre-commit hooks (local scanning), CI/CD pipeline checks (automated testing), and branch protection rules (enforced review).',
+   259→          connections: 'Version control connects to secure coding (reviewing code for vulnerabilities), documentation (commit messages as audit trail), and team collaboration practices.',
+   260→        },
+   261→        diagram: {
+   262→          type: 'flowchart',
+   263→          title: 'Secure Git Workflow',
+   264→          svgContent: '<svg viewBox="0 0 350 150" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="55" width="65" height="30" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="42" y="74" text-anchor="middle" font-size="8" fill="#1e40af">Write</text><line x1="75" y1="70" x2="95" y2="70" stroke="#6b7280" stroke-width="1"/><rect x="95" y="55" width="65" height="30" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="127" y="74" text-anchor="middle" font-size="8" fill="#92400e">Scan</text><line x1="160" y1="70" x2="180" y2="70" stroke="#6b7280" stroke-width="1"/><rect x="180" y="55" width="65" height="30" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="212" y="74" text-anchor="middle" font-size="8" fill="#166534">Review</text><line x1="245" y1="70" x2="265" y2="70" stroke="#6b7280" stroke-width="1"/><rect x="265" y="55" width="65" height="30" rx="4" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1"/><text x="297" y="74" text-anchor="middle" font-size="8" fill="#5b21b6">Merge</text></svg>',
+   265→        },
+   266→        practicalExamples: [
+   267→          {
+   268→            title: 'Setting Up Pre-commit Secret Scanning',
+   269→            description: 'Configure a pre-commit hook that scans staged files for API keys, passwords, and other secrets before allowing a commit.',
+   270→          },
+   271→        ],
+   272→        commonMistakes: [
+   273→          {
+   274→            mistake: 'Committing .env files with real credentials',
+   275→            explanation: '.env files with real secrets committed to Git are immediately exposed, even if deleted later (history persists).',
+   276→            correctApproach: 'Add .env to .gitignore, use .env.example with dummy values, and use secret management tools for production credentials.',
+   277→          },
+   278→        ],
+   279→        furtherReading: [
+   280→          { topic: 'Secure Coding', slug: 'input-validation', categorySlug: 'secure-coding' },
+   281→        ],
+   282→      },
+   283→      {
+   284→        slug: 'branching-strategies',
+   285→        title: 'Branching & Code Review',
+   286→        categorySlug: 'version-control',
+   287→        introduction: {
+   288→          what: 'Branching strategies and code review practices that enforce security standards throughout the development lifecycle.',
+   289→          why: 'Structured branching and mandatory code review catch vulnerabilities before they reach production and create accountability.',
+   290→          where: 'These practices apply to all team development workflows, from small startups to large enterprise organizations.',
+   291→          problem: 'Without structured branching and review, insecure code can be deployed directly to production, bypassing all safety checks.',
+   292→        },
+   293→        theory: {
+   294→          terms: [
+   295→            { term: 'Trunk-Based Development', definition: 'A strategy where developers integrate their changes to the main branch frequently, using feature flags for incomplete work.' },
+   296→            { term: 'Pull Request', definition: 'A proposal to merge changes from one branch to another, enabling code review and discussion before integration.' },
+   297→            { term: 'CODEOWNERS', definition: 'A file that defines which individuals or teams must review changes to specific parts of the codebase.' },
+   298→          ],
+   299→          principles: 'Every change to production code must be reviewed by at least one other developer. Critical code paths require additional security-focused review.',
+   300→          architecture: 'Branching strategies range from GitFlow (multiple long-lived branches) to trunk-based (short-lived feature branches with frequent integration).',
+   301→          connections: 'Code review practices connect to secure coding (catching vulnerabilities), documentation (explaining design decisions), and team security culture.',
+   302→        },
+   303→        diagram: {
+   304→          type: 'flowchart',
+   305→          title: 'Code Review Flow',
+   306→          svgContent: '<svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="50" width="60" height="30" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="50" y="69" text-anchor="middle" font-size="8" fill="#1e40af">PR</text><line x1="80" y1="65" x2="100" y2="65" stroke="#6b7280" stroke-width="1"/><rect x="100" y="50" width="60" height="30" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="130" y="69" text-anchor="middle" font-size="8" fill="#92400e">Review</text><line x1="160" y1="65" x2="180" y2="65" stroke="#6b7280" stroke-width="1"/><rect x="180" y="50" width="60" height="30" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="210" y="69" text-anchor="middle" font-size="8" fill="#166534">CI/CD</text><line x1="240" y1="65" x2="260" y2="65" stroke="#6b7280" stroke-width="1"/><rect x="260" y="50" width="30" height="30" rx="4" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1"/><text x="275" y="69" text-anchor="middle" font-size="8" fill="#5b21b6">✓</text></svg>',
+   307→        },
+   308→        practicalExamples: [
+   309→          {
+   310→            title: 'Security-Focused Code Review Checklist',
+   311→            description: 'Create a code review checklist that includes security-specific items like input validation, authentication checks, and data exposure.',
+   312→          },
+   313→        ],
+   314→        commonMistakes: [
+   315→          {
+   316→            mistake: 'Rubber-stamping pull requests without thorough review',
+   317→            explanation: 'Superficial review defeats the purpose of code review and allows vulnerabilities to slip through.',
+   318→            correctApproach: 'Reviewers should understand the change, test edge cases mentally, and specifically check for security implications.',
+   319→          },
+   320→        ],
+   321→        furtherReading: [
+   322→          { topic: 'Secure Coding', slug: 'input-validation', categorySlug: 'secure-coding' },
+   323→          { topic: 'Documentation & Standards', slug: 'security-documentation', categorySlug: 'documentation-standards' },
+   324→        ],
+   325→      },
+   326→    ],
+   327→  },
+   328→  {
+   329→    slug: 'secure-coding',
+   330→    title: 'Secure Coding',
+   331→    description: 'Input validation, output encoding, injection prevention, and defensive programming techniques',
+   332→    iconName: 'Code2',
+   333→    subtopics: [
+   334→      {
+   335→        slug: 'input-validation',
+   336→        title: 'Input Validation & Sanitization',
+   337→        categorySlug: 'secure-coding',
+   338→        introduction: {
+   339→          what: 'Input validation ensures that data received by an application meets expected format, type, and range requirements before processing.',
+   340→          why: 'Unvalidated input is the root cause of injection attacks, data corruption, and unexpected application behavior — it is the #1 web vulnerability.',
+   341→          where: 'All user input must be validated: form fields, URL parameters, HTTP headers, cookies, file uploads, and API request bodies.',
+   342→          problem: 'Developers often trust client input or only validate on the client side, leaving server-side code vulnerable to crafted malicious inputs.',
+   343→        },
+   344→        theory: {
+   345→          terms: [
+   346→            { term: 'Whitelist Validation', definition: 'Accepting only input that matches a known-good pattern (allowlist), rejecting everything else by default.' },
+   347→            { term: 'Sanitization', definition: 'The process of cleaning input by removing or encoding dangerous characters while preserving safe content.' },
+   348→            { term: 'Parameterized Query', definition: 'A database query technique that separates SQL code from data, preventing SQL injection by treating all input as literal values.' },
+   349→          ],
+   350→          principles: 'Validate on the server side. Use whitelist (allowlist) validation. Reject unexpected input. Sanitize before output. Use parameterized queries for all database access.',
+   351→          architecture: 'Input validation should happen at multiple layers: API gateway (rate limiting, schema validation), application layer (business rules), and data layer (database constraints).',
+   352→          connections: 'Input validation prevents SQL injection, XSS, and command injection — three of the most common and dangerous web vulnerabilities.',
+   353→        },
+   354→        diagram: {
+   355→          type: 'pipeline',
+   356→          title: 'Input Validation Pipeline',
+   357→          svgContent: '<svg viewBox="0 0 380 80" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="20" width="70" height="35" rx="4" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="40" y="42" text-anchor="middle" font-size="8" fill="#991b1b">Raw Input</text><line x1="75" y1="37" x2="95" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="95" y="20" width="70" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="130" y="42" text-anchor="middle" font-size="8" fill="#92400e">Validate</text><line x1="165" y1="37" x2="185" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="185" y="20" width="70" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="220" y="42" text-anchor="middle" font-size="8" fill="#166534">Sanitize</text><line x1="255" y1="37" x2="275" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="275" y="20" width="70" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="310" y="42" text-anchor="middle" font-size="8" fill="#1e40af">Process</text></svg>',
+   358→        },
+   359→        practicalExamples: [
+   360→          {
+   361→            title: 'Parameterized Queries vs String Concatenation',
+   362→            description: 'Compare vulnerable SQL string concatenation with safe parameterized queries.',
+   363→            code: `// VULNERABLE - string concatenation\nconst query = "SELECT * FROM users WHERE id = " + userId;\n\n// SAFE - parameterized query\nconst query = "SELECT * FROM users WHERE id = $1";\ndb.query(query, [userId]);`,
+   364→            language: 'typescript',
+   365→          },
+   366→        ],
+   367→        commonMistakes: [
+   368→          {
+   369→            mistake: 'Using blacklists for input validation',
+   370→            explanation: 'Blacklists try to block known bad patterns but always miss edge cases and new attack vectors.',
+   371→            correctApproach: 'Use whitelist validation — define what good input looks like and reject everything that doesn\'t match.',
+   372→          },
+   373→        ],
+   374→        furtherReading: [
+   375→          { topic: 'Common Vulnerabilities', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+   376→        ],
+   377→      },
+   378→      {
+   379→        slug: 'output-encoding',
+   380→        title: 'Output Encoding & XSS Prevention',
+   381→        categorySlug: 'secure-coding',
+   382→        introduction: {
+   383→          what: 'Output encoding transforms data so that it is treated as literal text rather than executable code when rendered in a browser or other interpreter.',
+   384→          why: 'Cross-Site Scripting (XSS) occurs when untrusted data is included in a response without proper encoding, allowing attackers to inject malicious scripts.',
+   385→          where: 'Output encoding is needed whenever user-supplied data is rendered in HTML, JavaScript, CSS, URLs, or any context where it could be interpreted as code.',
+   386→          problem: 'XSS is one of the most prevalent web vulnerabilities, affecting millions of sites and enabling account takeover, data theft, and malware distribution.',
+   387→        },
+   388→        theory: {
+   389→          terms: [
+   390→            { term: 'Context-Sensitive Encoding', definition: 'Encoding data differently depending on where it appears: HTML body, HTML attribute, JavaScript, CSS, or URL context each require different encoding.' },
+   391→            { term: 'Content Security Policy', definition: 'A browser security feature that restricts which resources a page can load, preventing XSS by blocking inline scripts and unauthorized sources.' },
+   392→            { term: 'DOM-based XSS', definition: 'A variant of XSS where the vulnerability is entirely client-side — user input flows into a sink that modifies the DOM unsafely.' },
+   393→          ],
+   394→          principles: 'Encode output at the point of use, context-sensitively. Use auto-escaping template engines. Implement CSP as a defense-in-depth measure.',
+   395→          architecture: 'XSS prevention spans server-side (template auto-escaping, HTTP headers) and client-side (DOM sanitization, CSP, Trusted Types).',
+   396→          connections: 'Output encoding complements input validation and is essential for preventing the XSS family of vulnerabilities.',
+   397→        },
+   398→        diagram: {
+   399→          type: 'comparison',
+   400→          title: 'XSS Attack Types',
+   401→          svgContent: '<svg viewBox="0 0 350 120" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="90" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="60" y="30" text-anchor="middle" font-size="9" font-weight="bold" fill="#991b1b">Reflected</text><text x="60" y="50" text-anchor="middle" font-size="7" fill="#991b1b">In request</text><text x="60" y="62" text-anchor="middle" font-size="7" fill="#991b1b">Reflected in</text><text x="60" y="74" text-anchor="middle" font-size="7" fill="#991b1b">response</text><rect x="125" y="10" width="100" height="90" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="175" y="30" text-anchor="middle" font-size="9" font-weight="bold" fill="#92400e">Stored</text><text x="175" y="50" text-anchor="middle" font-size="7" fill="#92400e">Persisted in</text><text x="175" y="62" text-anchor="middle" font-size="7" fill="#92400e">database,</text><text x="175" y="74" text-anchor="middle" font-size="7" fill="#92400e">served to all</text><rect x="240" y="10" width="100" height="90" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="290" y="30" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e40af">DOM-based</text><text x="290" y="50" text-anchor="middle" font-size="7" fill="#1e40af">Client-side</text><text x="290" y="62" text-anchor="middle" font-size="7" fill="#1e40af">only, never</text><text x="290" y="74" text-anchor="middle" font-size="7" fill="#1e40af">hits server</text></svg>',
+   402→        },
+   403→        practicalExamples: [
+   404→          {
+   405→            title: 'Content Security Policy Headers',
+   406→            description: 'Configure CSP headers to prevent XSS by restricting script sources and disabling inline scripts.',
+   407→            code: `// CSP Header\nContent-Security-Policy:\n  default-src 'self';\n  script-src 'self' https://trusted.cdn.com;\n  style-src 'self' 'unsafe-inline';\n  img-src 'self' data: https:;`,
+   408→            language: 'http',
+   409→          },
+   410→        ],
+   411→        commonMistakes: [
+   412→          {
+   413→            mistake: 'Relying solely on input validation to prevent XSS',
+   414→            explanation: 'Input validation alone cannot catch all XSS vectors; different output contexts require different encoding.',
+   415→            correctApproach: 'Use both input validation and context-sensitive output encoding as complementary defenses.',
+   416→          },
+   417→        ],
+   418→        furtherReading: [
+   419→          { topic: 'Input Validation', slug: 'input-validation', categorySlug: 'secure-coding' },
+   420→          { topic: 'Common Vulnerabilities', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+   421→        ],
+   422→      },
+   423→    ],
+   424→  },
+   425→  {
+   426→    slug: 'common-vulnerabilities',
+   427→    title: 'Common Vulnerabilities',
+   428→    description: 'OWASP Top 10, real-world attack patterns, and hands-on vulnerability analysis',
+   429→    iconName: 'AlertTriangle',
+   430→    subtopics: [
+   431→      {
+   432→        slug: 'owasp-top-10',
+   433→        title: 'OWASP Top 10 Deep Dive',
+   434→        categorySlug: 'common-vulnerabilities',
+   435→        introduction: {
+   436→          what: 'The OWASP Top 10 is a standard awareness document representing the ten most critical web application security risks, updated periodically by the security community.',
+   437→          why: 'It provides a consensus-based prioritization of the most impactful vulnerabilities, helping teams focus their security efforts effectively.',
+   438→          where: 'Every web application should be assessed against the OWASP Top 10 as a baseline security standard.',
+   439→          problem: 'Many production applications still suffer from well-known vulnerabilities listed in the OWASP Top 10, often due to lack of awareness or prioritization.',
+   440→        },
+   441→        theory: {
+   442→          terms: [
+   443→            { term: 'Injection', definition: 'An attack where untrusted data is sent to an interpreter as part of a command or query, tricking it into executing unintended commands.' },
+   444→            { term: 'Broken Access Control', definition: 'When users can act outside their intended permissions — accessing other users\' data or administrative functions.' },
+   445→            { term: 'Security Misconfiguration', definition: 'Default configurations, incomplete setups, open cloud storage, or unnecessary features enabled in production.' },
+   446→          ],
+   447→          principles: 'The OWASP Top 10 is a starting point, not a complete security program. Use it to establish baseline awareness and drive targeted improvements.',
+   448→          architecture: 'Each vulnerability category maps to specific architectural controls: injection → parameterized queries, broken access control → RBAC, misconfiguration → infrastructure-as-code.',
+   449→          connections: 'OWASP vulnerabilities intersect with secure coding practices, authentication design, and architectural security decisions.',
+   450→        },
+   451→        diagram: {
+   452→          type: 'comparison',
+   453→          title: 'OWASP Top 10 (2021)',
+   454→          svgContent: '<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg"><text x="200" y="15" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">OWASP Top 10 — 2021</text><rect x="10" y="25" width="115" height="22" rx="3" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="67" y="40" text-anchor="middle" font-size="7" fill="#991b1b">A01: Broken Access Ctrl</text><rect x="135" y="25" width="115" height="22" rx="3" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="192" y="40" text-anchor="middle" font-size="7" fill="#92400e">A02: Crypto Failures</text><rect x="260" y="25" width="115" height="22" rx="3" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="317" y="40" text-anchor="middle" font-size="7" fill="#166534">A03: Injection</text><rect x="10" y="55" width="115" height="22" rx="3" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="67" y="70" text-anchor="middle" font-size="7" fill="#1e40af">A04: Insecure Design</text><rect x="135" y="55" width="115" height="22" rx="3" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1"/><text x="192" y="70" text-anchor="middle" font-size="7" fill="#5b21b6">A05: Security Misconfig</text><rect x="260" y="55" width="115" height="22" rx="3" fill="#fce7f3" stroke="#ec4899" stroke-width="1"/><text x="317" y="70" text-anchor="middle" font-size="7" fill="#9d174d">A06: Vulnerable Comp.</text><rect x="10" y="85" width="115" height="22" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/><text x="67" y="100" text-anchor="middle" font-size="7" fill="#166534">A07: Auth Failures</text><rect x="135" y="85" width="115" height="22" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1"/><text x="192" y="100" text-anchor="middle" font-size="7" fill="#9a3412">A08: Software Integrity</text><rect x="260" y="85" width="115" height="22" rx="3" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/><text x="317" y="100" text-anchor="middle" font-size="7" fill="#075985">A09: Logging Failures</text><rect x="80" y="115" width="240" height="22" rx="3" fill="#faf5ff" stroke="#9333ea" stroke-width="1"/><text x="200" y="130" text-anchor="middle" font-size="7" fill="#581c87">A10: Server-Side Request Forgery</text></svg>',
+   455→        },
+   456→        practicalExamples: [
+   457→          {
+   458→            title: 'Testing for Broken Access Control',
+   459→            description: 'Walk through a methodology for testing access control in a web application, including IDOR, privilege escalation, and forced browsing.',
+   460→          },
+   461→        ],
+   462→        commonMistakes: [
+   463→          {
+   464→            mistake: 'Treating the OWASP Top 10 as a complete security checklist',
+   465→            explanation: 'The Top 10 covers the most common risks but doesn\'t address all threats specific to your application.',
+   466→            correctApproach: 'Use the OWASP Top 10 as a baseline, then perform threat modeling and targeted testing based on your application\'s specific risk profile.',
+   467→          },
+   468→        ],
+   469→        furtherReading: [
+   470→          { topic: 'Input Validation', slug: 'input-validation', categorySlug: 'secure-coding' },
+   471→          { topic: 'Authentication Fundamentals', slug: 'auth-basics', categorySlug: 'authentication-authorization' },
+   472→        ],
+   473→      },
+   474→      {
+   475→        slug: 'sql-injection',
+   476→        title: 'SQL Injection Attack & Defense',
+   477→        categorySlug: 'common-vulnerabilities',
+   478→        introduction: {
+   479→          what: 'SQL injection is a code injection technique that exploits vulnerabilities in an application\'s database query construction, allowing attackers to execute arbitrary SQL commands.',
+   480→          why: 'SQL injection can lead to complete database compromise — data theft, data modification, authentication bypass, and even server takeover.',
+   481→          where: 'Any application that constructs SQL queries from user input without parameterization is vulnerable, regardless of the database or language used.',
+   482→          problem: 'Despite being well-understood for decades, SQL injection remains prevalent due to developer inexperience, legacy code, and inadequate security testing.',
+   483→        },
+   484→        theory: {
+   485→          terms: [
+   486→            { term: 'Union-based Injection', definition: 'A technique that uses the UNION SQL operator to combine the results of the injected query with the original, extracting data from other tables.' },
+   487→            { term: 'Blind Injection', definition: 'Techniques for extracting data when the application doesn\'t show query results directly, using boolean conditions or time delays.' },
+   488→            { term: 'ORM Injection', definition: 'Injection vulnerabilities that occur through ORM frameworks when raw queries or unsafe filters are used instead of the ORM\'s query builder.' },
+   489→          ],
+   490→          principles: 'Prevent SQL injection by using parameterized queries exclusively. Never concatenate user input into SQL strings. Use ORMs safely.',
+   491→          architecture: 'Defense layers: parameterized queries (primary), stored procedures, input validation (defense in depth), and database permission restrictions (least privilege).',
+   492→          connections: 'SQL injection is a specific instance of the broader injection vulnerability class, connecting to input validation and secure coding practices.',
+   493→        },
+   494→        diagram: {
+   495→          type: 'flowchart',
+   496→          title: 'SQL Injection Attack Flow',
+   497→          svgContent: '<svg viewBox="0 0 350 120" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="30" width="70" height="35" rx="4" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="45" y="52" text-anchor="middle" font-size="8" fill="#991b1b">Inject</text><line x1="80" y1="47" x2="100" y2="47" stroke="#6b7280" stroke-width="1"/><rect x="100" y="30" width="70" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="135" y="52" text-anchor="middle" font-size="8" fill="#92400e">Execute</text><line x1="170" y1="47" x2="190" y2="47" stroke="#6b7280" stroke-width="1"/><rect x="190" y="30" width="70" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="225" y="52" text-anchor="middle" font-size="8" fill="#166534">Extract</text><line x1="260" y1="47" x2="280" y2="47" stroke="#6b7280" stroke-width="1"/><rect x="280" y="30" width="60" height="35" rx="4" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1"/><text x="310" y="52" text-anchor="middle" font-size="8" fill="#5b21b6">Pwn</text></svg>',
+   498→        },
+   499→        practicalExamples: [
+   500→          {
+   501→            title: 'From Vulnerable to Safe Query',
+   502→            description: 'Transform a vulnerable string-concatenation query into a safe parameterized query.',
+   503→            code: `// VULNERABLE\napp.get('/user', (req, res) => {\n  db.query(\`SELECT * FROM users WHERE id = \${req.query.id}\`);\n});\n\n// SAFE\napp.get('/user', (req, res) => {\n  db.query('SELECT * FROM users WHERE id = $1', [req.query.id]);\n});`,
+   504→            language: 'typescript',
+   505→          },
+   506→        ],
+   507→        commonMistakes: [
+   508→          {
+   509→            mistake: 'Using string escaping instead of parameterized queries',
+   510→            explanation: 'Manual escaping is error-prone and database-specific; there are always bypass techniques for custom escaping.',
+   511→            correctApproach: 'Always use parameterized queries or prepared statements — they are the only reliably safe approach.',
+   512→          },
+   513→        ],
+   514→        furtherReading: [
+   515→          { topic: 'Input Validation', slug: 'input-validation', categorySlug: 'secure-coding' },
+   516→          { topic: 'OWASP Top 10', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+   517→        ],
+   518→      },
+   519→    ],
+   520→  },
+   521→  {
+   522→    slug: 'web-architecture',
+   523→    title: 'Web Architecture',
+   524→    description: 'Secure system design, microservices security, API security, and infrastructure best practices',
+   525→    iconName: 'Layers',
+   526→    subtopics: [
+   527→      {
+   528→        slug: 'secure-architecture',
+   529→        title: 'Secure System Design',
+   530→        categorySlug: 'web-architecture',
+   531→        introduction: {
+   532→          what: 'Secure system design incorporates security considerations into the architectural decisions of web applications, from network topology to service communication patterns.',
+   533→          why: 'Security built into the architecture is far more effective and cheaper than bolting it on after development. Design flaws are the hardest vulnerabilities to fix.',
+   534→          where: 'Architecture decisions affect every part of a system — network segmentation, service boundaries, data flow, authentication boundaries, and deployment topology.',
+   535→          problem: 'Many security vulnerabilities stem from architectural decisions made early in development that are difficult or impossible to fix without major refactoring.',
+   536→        },
+   537→        theory: {
+   538→          terms: [
+   539→            { term: 'Zero Trust Architecture', definition: 'A security model that assumes no implicit trust and continuously validates every access request regardless of network location.' },
+   540→            { term: 'Service Mesh', definition: 'An infrastructure layer that handles service-to-service communication, providing mutual TLS, traffic management, and observability.' },
+   541→            { term: 'API Gateway', definition: 'A server that acts as an API front-end, receiving requests and routing them to appropriate services while enforcing security policies.' },
+   542→          ],
+   543→          principles: 'Design for failure. Assume breach. Minimize trust boundaries. Encrypt data in transit and at rest. Apply least privilege to service accounts.',
+   544→          architecture: 'Secure architecture combines network security (segmentation, WAFs), application security (auth, validation), and infrastructure security (secrets, containers).',
+   545→          connections: 'Secure architecture underpins all other security domains — authentication, secure coding, and vulnerability prevention depend on a solid architectural foundation.',
+   546→        },
+   547→        diagram: {
+   548→          type: 'architecture',
+   549→          title: 'Zero Trust Architecture',
+   550→          svgContent: '<svg viewBox="0 0 350 180" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="10" width="250" height="160" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/><text x="175" y="28" text-anchor="middle" font-size="10" fill="#6b7280">Zero Trust Perimeter</text><rect x="70" y="40" width="90" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="115" y="62" text-anchor="middle" font-size="8" fill="#1e40af">Auth Service</text><rect x="190" y="40" width="90" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="235" y="62" text-anchor="middle" font-size="8" fill="#166534">Policy Engine</text><rect x="70" y="100" width="90" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="115" y="122" text-anchor="middle" font-size="8" fill="#92400e">App Service</text><rect x="190" y="100" width="90" height="35" rx="4" fill="#fce7f3" stroke="#ec4899" stroke-width="1"/><text x="235" y="122" text-anchor="middle" font-size="8" fill="#9d174d">Data Store</text><line x1="115" y1="75" x2="115" y2="100" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/><line x1="235" y1="75" x2="235" y2="100" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/></svg>',
+   551→        },
+   552→        practicalExamples: [
+   553→          {
+   554→            title: 'Designing a Secure Microservices Architecture',
+   555→            description: 'Design a microservices system with mutual TLS, service mesh, API gateway, and centralized authentication.',
+   556→          },
+   557→        ],
+   558→        commonMistakes: [
+   559→          {
+   560→            mistake: 'Trusting internal network traffic implicitly',
+   561→            explanation: 'Once an attacker breaches the perimeter, unrestricted internal access allows lateral movement.',
+   562→            correctApproach: 'Apply zero trust principles: authenticate and authorize all service-to-service communication, not just external requests.',
+   563→          },
+   564→        ],
+   565→        furtherReading: [
+   566→          { topic: 'Authentication Fundamentals', slug: 'auth-basics', categorySlug: 'authentication-authorization' },
+   567→          { topic: 'Core Security Principles', slug: 'security-principles', categorySlug: 'web-security-basics' },
+   568→        ],
+   569→      },
+   570→      {
+   571→        slug: 'api-security',
+   572→        title: 'API Security',
+   573→        categorySlug: 'web-architecture',
+   574→        introduction: {
+   575→          what: 'API security encompasses the practices and tools used to protect application programming interfaces from abuse, unauthorized access, and data exposure.',
+   576→          why: 'APIs are the primary attack surface of modern web applications — they expose business logic and data directly, often with less protection than UI endpoints.',
+   577→          where: 'API security applies to REST APIs, GraphQL endpoints, WebSocket connections, gRPC services, and any programmatic interface.',
+   578→          problem: 'APIs often have weaker access controls than web UIs, inconsistent validation, and insufficient rate limiting, making them attractive targets.',
+   579→        },
+   580→        theory: {
+   581→          terms: [
+   582→            { term: 'Rate Limiting', definition: 'Restricting the number of API requests a client can make within a time window, preventing abuse and DDoS attacks.' },
+   583→            { term: 'API Key', definition: 'A unique identifier used to authenticate API clients, track usage, and enforce rate limits and permissions.' },
+   584→            { term: 'OAuth 2.0 Scopes', definition: 'Fine-grained permissions that define what actions an access token authorizes, enabling least-privilege API access.' },
+   585→          ],
+   586→          principles: 'Authenticate all API requests. Use granular authorization (scopes). Validate all inputs. Rate limit aggressively. Version your APIs. Log everything.',
+   587→          architecture: 'API security layers: API gateway (rate limiting, auth), application layer (business logic validation), and data layer (query restrictions, field-level access).',
+   588→          connections: 'API security connects to authentication (token validation), secure coding (input validation), and architecture (gateway patterns).',
+   589→        },
+   590→        diagram: {
+   591→          type: 'architecture',
+   592→          title: 'API Security Stack',
+   593→          svgContent: '<svg viewBox="0 0 350 150" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="10" width="290" height="35" rx="4" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="175" y="32" text-anchor="middle" font-size="9" fill="#991b1b">Rate Limiting & WAF</text><rect x="30" y="55" width="290" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="175" y="77" text-anchor="middle" font-size="9" fill="#92400e">Authentication & Authorization</text><rect x="30" y="100" width="290" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="175" y="122" text-anchor="middle" font-size="9" fill="#166534">Input Validation & Business Logic</text></svg>',
+   594→        },
+   595→        practicalExamples: [
+   596→          {
+   597→            title: 'Implementing API Rate Limiting',
+   598→            description: 'Build a rate limiting middleware that tracks requests per client and enforces configurable limits.',
+   599→            code: `// Express rate limiting\nimport rateLimit from 'express-rate-limit';\n\nconst limiter = rateLimit({\n  windowMs: 15 * 60 * 1000, // 15 min\n  max: 100,\n  message: 'Too many requests'\n});\napp.use('/api/', limiter);`,
+   600→            language: 'typescript',
+   601→          },
+   602→        ],
+   603→        commonMistakes: [
+   604→          {
+   605→            mistake: 'Exposing internal API structure to clients',
+   606→            explanation: 'Revealing internal endpoints, error details, or stack traces helps attackers understand and exploit your system.',
+   607→            correctApproach: 'Return generic error messages to clients, log detailed errors server-side, and use API gateways to abstract internal structure.',
+   608→          },
+   609→        ],
+   610→        furtherReading: [
+   611→          { topic: 'Secure System Design', slug: 'secure-architecture', categorySlug: 'web-architecture' },
+   612→        ],
+   613→      },
+   614→    ],
+   615→  },
+   616→  {
+   617→    slug: 'documentation-standards',
+   618→    title: 'Documentation & Standards',
+   619→    description: 'Security documentation, compliance frameworks, and industry standards for web application security',
+   620→    iconName: 'FileText',
+   621→    subtopics: [
+   622→      {
+   623→        slug: 'security-documentation',
+   624→        title: 'Security Documentation',
+   625→        categorySlug: 'documentation-standards',
+   626→        introduction: {
+   627→          what: 'Security documentation includes policies, procedures, architecture diagrams, threat models, and incident response plans that define how an organization manages security.',
+   628→          why: 'Without documentation, security knowledge is tribal and fragile. Documentation ensures consistency, enables audits, and supports incident response.',
+   629→          where: 'Security documentation is needed in every organization — from startups (security policy, incident response plan) to enterprises (compliance frameworks, audit reports).',
+   630→          problem: 'Many organizations have outdated, incomplete, or non-existent security documentation, making it impossible to demonstrate compliance or respond effectively to incidents.',
+   631→        },
+   632→        theory: {
+   633→          terms: [
+   634→            { term: 'Security Policy', definition: 'A high-level document that defines an organization\'s security objectives, responsibilities, and acceptable use rules.' },
+   635→            { term: 'Incident Response Plan', definition: 'A documented procedure for detecting, responding to, and recovering from security incidents, with defined roles and communication plans.' },
+   636→            { term: 'Security Architecture Review', definition: 'A systematic evaluation of a system\'s security architecture to identify gaps, validate controls, and ensure alignment with policies.' },
+   637→          ],
+   638→          principles: 'Documentation must be living — regularly reviewed and updated. It should be practical and actionable, not bureaucratic shelfware.',
+   639→          architecture: 'Security documentation hierarchy: policies (what), standards (how good), procedures (how to), and guidelines (recommendations).',
+   640→          connections: 'Documentation connects to all security domains — it records threat models, coding standards, architecture decisions, and vulnerability responses.',
+   641→        },
+   642→        diagram: {
+   643→          type: 'flowchart',
+   644→          title: 'Documentation Hierarchy',
+   645→          svgContent: '<svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg"><rect x="100" y="5" width="100" height="20" rx="3" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/><text x="150" y="19" text-anchor="middle" font-size="8" fill="#991b1b">Policies</text><rect x="75" y="35" width="70" height="20" rx="3" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="110" y="49" text-anchor="middle" font-size="8" fill="#92400e">Standards</text><rect x="155" y="35" width="70" height="20" rx="3" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="190" y="49" text-anchor="middle" font-size="8" fill="#166534">Procedures</text><rect x="50" y="65" width="200" height="20" rx="3" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="150" y="79" text-anchor="middle" font-size="8" fill="#1e40af">Guidelines & Best Practices</text></svg>',
+   646→        },
+   647→        practicalExamples: [
+   648→          {
+   649→            title: 'Writing an Incident Response Plan',
+   650→            description: 'Create a practical incident response plan with clear roles, escalation procedures, communication templates, and post-incident review processes.',
+   651→          },
+   652→        ],
+   653→        commonMistakes: [
+   654→          {
+   655→            mistake: 'Writing documentation once and never updating it',
+   656→            explanation: 'Outdated documentation is worse than no documentation — it creates a false sense of security and misleads decision-makers.',
+   657→            correctApproach: 'Schedule regular reviews (quarterly minimum), update after every significant change or incident, and track document versions.',
+   658→          },
+   659→        ],
+   660→        furtherReading: [
+   661→          { topic: 'Core Security Principles', slug: 'security-principles', categorySlug: 'web-security-basics' },
+   662→        ],
+   663→      },
+   664→    ],
+   665→  },
+   666→  {
+   667→    slug: 'learning-resources',
+   668→    title: 'Learning Resources',
+   669→    description: 'Curated tools, platforms, communities, and practice environments for continuous security learning',
+   670→    iconName: 'BookOpen',
+   671→    subtopics: [
+   672→      {
+   673→        slug: 'practice-platforms',
+   674→        title: 'Practice Platforms & Labs',
+   675→        categorySlug: 'learning-resources',
+   676→        introduction: {
+   677→          what: 'Interactive platforms and lab environments where developers can safely practice identifying and exploiting vulnerabilities to improve their defensive skills.',
+   678→          why: 'Hands-on practice is essential for developing security intuition. Reading about vulnerabilities is not the same as understanding how they work in practice.',
+   679→          where: 'Use these platforms for personal skill development, team training exercises, and interview preparation for security-focused roles.',
+   680→          problem: 'Many developers understand security concepts theoretically but lack practical experience identifying and fixing vulnerabilities in real code.',
+   681→        },
+   682→        theory: {
+   683→          terms: [
+   684→            { term: 'CTF', definition: 'Capture The Flag — a security competition where participants solve challenges to find hidden flags, testing various security skills.' },
+   685→            { term: 'DVWA', definition: 'Damn Vulnerable Web Application — an intentionally vulnerable PHP/MySQL application for practicing web security testing.' },
+   686→            { term: 'Bug Bounty', definition: 'A program where organizations reward independent security researchers for finding and reporting vulnerabilities in their systems.' },
+   687→          ],
+   688→          principles: 'Practice ethically and legally. Only test systems you own or have explicit permission to test. Use dedicated practice environments, never production systems.',
+   689→          architecture: 'Practice platforms range from browser-based (no setup) to self-hosted labs (full control) to cloud-based ranges (realistic environments).',
+   690→          connections: 'Practice platforms apply all the security knowledge from other topics — authentication, injection, access control, and architecture in realistic scenarios.',
+   691→        },
+   692→        diagram: {
+   693→          type: 'comparison',
+   694→          title: 'Practice Platform Types',
+   695→          svgContent: '<svg viewBox="0 0 350 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="70" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="60" y="32" text-anchor="middle" font-size="8" font-weight="bold" fill="#1e40af">Browser</text><text x="60" y="48" text-anchor="middle" font-size="7" fill="#1e40af">No setup</text><text x="60" y="60" text-anchor="middle" font-size="7" fill="#1e40af">Guided</text><rect x="125" y="10" width="100" height="70" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="175" y="32" text-anchor="middle" font-size="8" font-weight="bold" fill="#166534">Self-Hosted</text><text x="175" y="48" text-anchor="middle" font-size="7" fill="#166534">Full control</text><text x="175" y="60" text-anchor="middle" font-size="7" fill="#166534">Realistic</text><rect x="240" y="10" width="100" height="70" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="290" y="32" text-anchor="middle" font-size="8" font-weight="bold" fill="#92400e">Cloud Range</text><text x="290" y="48" text-anchor="middle" font-size="7" fill="#92400e">Enterprise</text><text x="290" y="60" text-anchor="middle" font-size="7" fill="#92400e">Collaborative</text></svg>',
+   696→        },
+   697→        practicalExamples: [
+   698→          {
+   699→            title: 'Setting Up a Local Security Lab',
+   700→            description: 'Configure a local environment with DVWA, WebGoat, and Juice Shop for safe vulnerability practice using Docker containers.',
+   701→          },
+   702→        ],
+   703→        commonMistakes: [
+   704→          {
+   705→            mistake: 'Testing vulnerabilities on production systems',
+   706→            explanation: 'Unauthorized testing is illegal and unethical, even with good intentions.',
+   707→            correctApproach: 'Only test on systems you own or have written permission to test. Use dedicated practice platforms and lab environments.',
+   708→          },
+   709→        ],
+   710→        furtherReading: [
+   711→          { topic: 'OWASP Top 10', slug: 'owasp-top-10', categorySlug: 'common-vulnerabilities' },
+   712→          { topic: 'Security Documentation', slug: 'security-documentation', categorySlug: 'documentation-standards' },
+   713→        ],
+   714→      },
+   715→      {
+   716→        slug: 'security-tools',
+   717→        title: 'Essential Security Tools',
+   718→        categorySlug: 'learning-resources',
+   719→        introduction: {
+   720→          what: 'A curated set of security tools for vulnerability scanning, penetration testing, code analysis, and security monitoring that every web developer should know.',
+   721→          why: 'Tools multiply your security effectiveness, automating repetitive checks and identifying vulnerabilities that manual review might miss.',
+   722→          where: 'Security tools are used in development (SAST, dependency scanning), testing (DAST, penetration), and production (monitoring, WAF).',
+   723→          problem: 'The sheer number of security tools can be overwhelming. Developers need guidance on which tools to prioritize and how to integrate them into their workflow.',
+   724→        },
+   725→        theory: {
+   726→          terms: [
+   727→            { term: 'SAST', definition: 'Static Application Security Testing — analyzes source code for vulnerabilities without executing the application.' },
+   728→            { term: 'DAST', definition: 'Dynamic Application Security Testing — tests running applications by sending crafted inputs and analyzing responses.' },
+   729→            { term: 'SCA', definition: 'Software Composition Analysis — identifies known vulnerabilities in third-party libraries and dependencies.' },
+   730→          ],
+   731→          principles: 'Automate security testing in CI/CD. Run SAST on every commit. Run DAST on every deployment. Keep dependency scanning continuous.',
+   732→          architecture: 'Security tools integrate into the development lifecycle: pre-commit hooks, CI pipelines, staging environments, and production monitoring.',
+   733→          connections: 'Security tools connect to secure coding (automated enforcement), version control (pre-commit hooks), and architecture (monitoring and alerting).',
+   734→        },
+   735→        diagram: {
+   736→          type: 'pipeline',
+   737→          title: 'Security in CI/CD Pipeline',
+   738→          svgContent: '<svg viewBox="0 0 380 80" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="20" width="65" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/><text x="37" y="42" text-anchor="middle" font-size="7" fill="#1e40af">Pre-commit</text><line x1="70" y1="37" x2="85" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="85" y="20" width="65" height="35" rx="4" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/><text x="117" y="42" text-anchor="middle" font-size="7" fill="#166534">SAST</text><line x1="150" y1="37" x2="165" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="165" y="20" width="65" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/><text x="197" y="42" text-anchor="middle" font-size="7" fill="#92400e">SCA</text><line x1="230" y1="37" x2="245" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="245" y="20" width="65" height="35" rx="4" fill="#fce7f3" stroke="#ec4899" stroke-width="1"/><text x="277" y="42" text-anchor="middle" font-size="7" fill="#9d174d">DAST</text><line x1="310" y1="37" x2="325" y2="37" stroke="#6b7280" stroke-width="1"/><rect x="325" y="20" width="50" height="35" rx="4" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1"/><text x="350" y="42" text-anchor="middle" font-size="7" fill="#5b21b6">Deploy</text></svg>',
+   739→        },
+   740→        practicalExamples: [
+   741→          {
+   742→            title: 'Integrating SAST into CI/CD',
+   743→            description: 'Set up a GitHub Actions workflow that runs static analysis on every pull request, blocking merges when vulnerabilities are found.',
+   744→          },
+   745→        ],
+   746→        commonMistakes: [
+   747→          {
+   748→            mistake: 'Running security tools but ignoring the results',
+   749→            explanation: 'Tools are only valuable if their findings are triaged and addressed. Ignoring alerts creates alert fatigue and misses real vulnerabilities.',
+   750→            correctApproach: 'Establish a triage process for findings, set severity thresholds that block deployment, and track remediation metrics.',
+   751→          },
+   752→        ],
+   753→        furtherReading: [
+   754→          { topic: 'Secure Coding', slug: 'input-validation', categorySlug: 'secure-coding' },
+   755→          { topic: 'Practice Platforms', slug: 'practice-platforms', categorySlug: 'learning-resources' },
+   756→        ],
+   757→      },
+   758→    ],
+   759→  },
+   760→];
+   761→

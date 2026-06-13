@@ -1,0 +1,591 @@
+     1→import { TopicCategory } from '@/types';
+     2→import { promptEngineering } from './topic-prompt-engineering';
+     3→import { contextEngineering } from './topic-context-engineering';
+     4→import { mcp } from './topic-mcp';
+     5→import { rag, aiAgents, localAI, productionAI } from './topic-remaining';
+     6→
+     7→export const topics: TopicCategory[] = [
+     8→  {
+     9→    slug: 'llm-basics',
+    10→    title: 'Основы LLM',
+    11→    description: 'Фундаментальные концепции больших языковых моделей: от токенов до архитектуры Transformer',
+    12→    iconName: 'Brain',
+    13→    subtopics: [
+    14→      {
+    15→        slug: 'what-is-llm',
+    16→        title: 'Что такое LLM',
+    17→        categorySlug: 'llm-basics',
+    18→        introduction: {
+    19→          what: 'Large Language Model (LLM) — это тип нейронной сети, обученной на огромных объёмах текстовых данных для понимания и генерации естественного языка. LLM способна выполнять широкий спектр задач: от перевода и суммаризации до написания кода и творческого письма. Модели вроде GPT-4, Claude, Gemini и Llama — всё это примеры LLM.',
+    20→          why: 'LLM нужны потому, что они позволяют автоматизировать работу с текстом на уровне, сопоставимом с человеческим. До появления LLM каждая языковая задача требовала отдельной модели и обучающей выборки. Теперь одна модель может решать тысячи задач без дополнительного обучения, что радикально снижает порог входа в AI-разработку.',
+    21→          where: 'LLM используются повсеместно: чат-боты и виртуальные ассистенты, системы автоматического перевода, инструменты для написания кода (Copilot), аналитика документов, генерация контента, системы поддержки клиентов, образовательные платформы и даже в научных исследованиях для анализа данных.',
+    22→          problem: 'LLM решают фундаментальную проблему понимания неструктурированного текста. До LLM компьютеры могли обрабатывать только жёстко структурированные данные. LLM способны извлекать смысл из произвольного текста, отвечать на вопросы, делать выводы и генерировать новый осмысленный контент.',
+    23→        },
+    24→        theory: {
+    25→          terms: [
+    26→            { term: 'Параметры', definition: 'Числовые значения в нейронной сети, которые настраиваются в процессе обучения. Модели с миллиардами параметров способны улавливать более сложные закономерности языка.' },
+    27→            { term: 'Токен', definition: 'Минимальная единица текста, которую обрабатывает модель. Один токен может быть словом, частью слова или даже одним символом.' },
+    28→            { term: 'Контекстное окно', definition: 'Максимальное количество токенов, которое модель может обработать за один запрос. Определяет, сколько текста модель «помнит» в рамках одного диалога.' },
+    29→            { term: 'Температура', definition: 'Параметр, контролирующий случайность ответов. Низкая температура = более предсказуемые ответы, высокая = более креативные.' },
+    30→            { term: 'Fine-tuning', definition: 'Дополнительное обучение модели на специфичных данных для улучшения её работы в конкретной области.' },
+    31→            { term: 'Инференс', definition: 'Процесс использования обученной модели для генерации ответа на новый запрос.' },
+    32→          ],
+    33→          principles: 'LLM работает по принципу предсказания следующего токена. Модель получает последовательность токенов и вычисляет вероятности для каждого возможного следующего токена. Выбрав наиболее вероятный (или один из вероятных с учётом температуры), модель добавляет его к последовательности и повторяет процесс. Этот авторегрессионный подход позволяет генерировать связный текст произвольной длины. Качество генерации зависит от объёма обучающих данных, количества параметров и архитектуры модели. Современные LLM обучаются на триллионах токенов из интернета, книг, кода и других источников, что позволяет им накапливать обширные знания о мире.',
+    34→          architecture: 'В основе большинства современных LLM лежит архитектура Transformer, представленная в 2017 году. Её ключевой компонент — механизм внимания (attention), который позволяет модели учитывать отношения между всеми токенами в последовательности одновременно. Transformer состоит из стопки слоёв, каждый из которых содержит блок self-attention и полносвязную нейронную сеть. В LLM используется декодерная часть Transformer: модель читает входной текст слева направо и предсказывает следующий токен. Маска внимания не позволяет модели «заглядывать вперёд». Размер модели определяется количеством слоёв (глубина), размером скрытого представления (ширина) и количеством голов внимания.',
+    35→          connections: 'LLM тесно связаны с Prompt Engineering (искусством составления запросов), RAG (дополнением внешними данными), AI Agents (автономными системами на базе LLM) и MCP (протоколом подключения инструментов). LLM — это фундамент, на котором строятся все эти технологии.',
+    36→        },
+    37→        diagram: {
+    38→          type: 'architecture',
+    39→          title: 'Архитектура LLM',
+    40→          svgContent: `<svg viewBox="0 0 600 530" xmlns="http://www.w3.org/2000/svg" class="w-full">
+    41→  <rect x="10" y="10" width="580" height="510" rx="12" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+    42→  <text x="300" y="38" text-anchor="middle" fill="var(--foreground)" font-size="15" font-weight="bold">Архитектура LLM</text>
+    43→  <!-- Шаг 1 -->
+    44→  <rect x="30" y="55" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+    45→  <circle cx="55" cy="82" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+    46→  <text x="55" y="87" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">1</text>
+    47→  <text x="80" y="77" fill="var(--foreground)" font-size="12" font-weight="bold">Входной текст</text>
+    48→  <text x="80" y="95" fill="var(--muted-foreground)" font-size="10">Пользователь отправляет запрос в виде текста</text>
+    49→  <!-- Connector -->
+    50→  <line x1="55" y1="110" x2="55" y2="125" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+    51→  <!-- Шаг 2 -->
+    52→  <rect x="30" y="125" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+    53→  <circle cx="55" cy="152" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+    54→  <text x="55" y="157" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">2</text>
+    55→  <text x="80" y="147" fill="var(--foreground)" font-size="12" font-weight="bold">Токенизация</text>
+    56→  <text x="80" y="165" fill="var(--muted-foreground)" font-size="10">Текст разбивается на токены (числовые ID из словаря)</text>
+    57→  <!-- Connector -->
+    58→  <line x1="55" y1="180" x2="55" y2="195" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+    59→  <!-- Шаг 3 -->
+    60→  <rect x="30" y="195" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+    61→  <circle cx="55" cy="222" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+    62→  <text x="55" y="227" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">3</text>
+    63→  <text x="80" y="217" fill="var(--foreground)" font-size="12" font-weight="bold">Embedding + Позиция</text>
+    64→  <text x="80" y="235" fill="var(--muted-foreground)" font-size="10">Токены превращаются в векторы + позиционное кодирование</text>
+    65→  <!-- Connector -->
+    66→  <line x1="55" y1="250" x2="55" y2="265" stroke="oklch(0.75 0.15 75)" stroke-width="1.5" opacity="0.3"/>
+    67→  <!-- Шаг 4 -->
+    68→  <rect x="30" y="265" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.1" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+    69→  <circle cx="55" cy="292" r="14" fill="oklch(0.75 0.15 75)" opacity="0.25"/>
+    70→  <text x="55" y="297" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">4</text>
+    71→  <text x="80" y="287" fill="var(--foreground)" font-size="12" font-weight="bold">Transformer (N слоёв)</text>
+    72→  <text x="80" y="305" fill="var(--muted-foreground)" font-size="10">Self-Attention + Feed-Forward + Layer Norm × N слоёв с residual связями</text>
+    73→  <!-- Connector -->
+    74→  <line x1="55" y1="320" x2="55" y2="335" stroke="oklch(0.6 0.2 280)" stroke-width="1.5" opacity="0.3"/>
+    75→  <!-- Шаг 5 -->
+    76→  <rect x="30" y="335" width="540" height="55" rx="8" fill="oklch(0.6 0.2 280)" opacity="0.08" stroke="oklch(0.6 0.2 280)" stroke-width="1.5"/>
+    77→  <circle cx="55" cy="362" r="14" fill="oklch(0.6 0.2 280)" opacity="0.2"/>
+    78→  <text x="55" y="367" text-anchor="middle" fill="oklch(0.6 0.2 280)" font-size="12" font-weight="bold">5</text>
+    79→  <text x="80" y="357" fill="var(--foreground)" font-size="12" font-weight="bold">LM Head + Softmax</text>
+    80→  <text x="80" y="375" fill="var(--muted-foreground)" font-size="10">Превращение в вероятности следующего токена</text>
+    81→  <!-- Connector -->
+    82→  <line x1="55" y1="390" x2="55" y2="405" stroke="oklch(0.6 0.2 280)" stroke-width="1.5" opacity="0.3"/>
+    83→  <!-- Шаг 6 -->
+    84→  <rect x="30" y="405" width="540" height="55" rx="8" fill="oklch(0.6 0.2 280)" opacity="0.08" stroke="oklch(0.6 0.2 280)" stroke-width="1.5"/>
+    85→  <circle cx="55" cy="432" r="14" fill="oklch(0.6 0.2 280)" opacity="0.2"/>
+    86→  <text x="55" y="437" text-anchor="middle" fill="oklch(0.6 0.2 280)" font-size="12" font-weight="bold">6</text>
+    87→  <text x="80" y="427" fill="var(--foreground)" font-size="12" font-weight="bold">Генерация токена</text>
+    88→  <text x="80" y="445" fill="var(--muted-foreground)" font-size="10">Выбор наиболее вероятного следующего токена</text>
+    89→  <!-- Bottom insight -->
+    90→  <rect x="30" y="475" width="540" height="40" rx="6" fill="var(--muted)" opacity="0.3"/>
+    91→  <text x="300" y="500" text-anchor="middle" fill="var(--foreground)" font-size="10" font-weight="bold">LLM = авторегрессионная модель, предсказывающая следующий токен шаг за шагом</text>
+    92→</svg>`,
+    93→        },
+    94→        practicalExamples: [
+    95→          {
+    96→            title: 'Запрос к GPT через API',
+    97→            description: 'Простейший пример вызова LLM через OpenAI API для генерации ответа на вопрос.',
+    98→            code: `import OpenAI from 'openai';
+    99→
+   100→const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+   101→
+   102→const response = await client.chat.completions.create({
+   103→  model: 'gpt-4',
+   104→  messages: [
+   105→    { role: 'system', content: 'Ты полезный ассистент.' },
+   106→    { role: 'user', content: 'Объясни, что такое LLM простыми словами' }
+   107→  ],
+   108→  temperature: 0.7,
+   109→});
+   110→
+   111→console.log(response.choices[0].message.content);`,
+   112→            language: 'typescript',
+   113→          },
+   114→          {
+   115→            title: 'Использование OpenRouter для доступа к разным моделям',
+   116→            description: 'OpenRouter позволяет обращаться к множеству LLM через единый API, что упрощает сравнение и переключение между моделями.',
+   117→            code: `const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+   118→  method: 'POST',
+   119→  headers: {
+   120→    'Authorization': 'Bearer YOUR_API_KEY',
+   121→    'Content-Type': 'application/json',
+   122→  },
+   123→  body: JSON.stringify({
+   124→    model: 'google/gemma-4-31b-it:free',
+   125→    messages: [
+   126→      { role: 'user', content: 'Привет! Расскажи о себе.' }
+   127→    ]
+   128→  })
+   129→});`,
+   130→            language: 'typescript',
+   131→          },
+   132→          {
+   133→            title: 'Подсчёт токенов перед отправкой',
+   134→            description: 'Важно понимать, сколько токенов занимает ваш запрос, чтобы не превысить лимит контекстного окна модели.',
+   135→            code: `import { encoding_for_model } from 'tiktoken';
+   136→
+   137→const enc = encoding_for_model('gpt-4');
+   138→const text = 'Привет, как дела? Это тестовое сообщение.';
+   139→const tokens = enc.encode(text);
+   140→
+   141→console.log(\`Количество токенов: \${tokens.length}\`);
+   142→// Каждый токен — это число, представляющее фрагмент текста
+   143→console.log('Токены:', tokens);
+   144→
+   145→enc.free(); // Освобождаем ресурсы`,
+   146→            language: 'typescript',
+   147→          },
+   148→        ],
+   149→        sandboxes: [
+   150→          {
+   151→            type: 'prompt-playground',
+   152→            title: 'Попробуйте запрос к LLM',
+   153→            description: 'Введите любой запрос и получите ответ от реальной языковой модели. Поменяйте системный промпт, чтобы увидеть, как меняется поведение модели.',
+   154→            defaultPrompt: 'Объясни, что такое LLM простыми словами',
+   155→            defaultSystem: 'Ты полезный ассистент. Отвечай кратко и понятно.',
+   156→          },
+   157→        ],
+   158→        commonMistakes: [
+   159→          {
+   160→            mistake: 'Считать, что LLM «понимает» текст как человек',
+   161→            explanation: 'LLM не обладает сознанием или пониманием в человеческом смысле. Она оперирует статистическими закономерностями в данных, на которых была обучена. Модель не «думает», а вычисляет наиболее вероятное продолжение последовательности токенов.',
+   162→            correctApproach: 'Рассматривайте LLM как мощный статистический инструмент. Она отлично справляется с паттернами, но может галлюцинировать — генерировать убедительно звучащий, но неверный контент. Всегда проверяйте критически важную информацию.',
+   163→          },
+   164→          {
+   165→            mistake: 'Игнорировать лимит контекстного окна',
+   166→            explanation: 'Многие новички пытаются отправить в модель слишком длинный текст, превышающий контекстное окно. Это приводит к обрезке входных данных или ошибке API.',
+   167→            correctApproach: 'Всегда проверяйте количество токенов в вашем запросе перед отправкой. Используйте tiktoken или аналогичные библиотеки для подсчёта. При необходимости разбивайте длинные тексты на части или используйте RAG для выборки релевантных фрагментов.',
+   168→          },
+   169→          {
+   170→            mistake: 'Использовать высокую температуру для фактических ответов',
+   171→            explanation: 'Высокая температура (0.8-1.0) увеличивает случайность, что хорошо для креативных задач, но приводит к неточностям в фактических ответах, коде и аналитике.',
+   172→            correctApproach: 'Для фактических вопросов, написания кода и аналитических задач используйте температуру 0.0-0.3. Для творческого письма, мозгового штурма и генерации идей — 0.7-1.0.',
+   173→          },
+   174→          {
+   175→            mistake: 'Не указывать системный промпт',
+   176→            explanation: 'Без системного промпта модель не знает, в какой роли она выступает, что приводит к расплывчатым и непоследовательным ответам.',
+   177→            correctApproach: 'Всегда задавайте системный промпт, определяющий роль, тон, формат и ограничения ответа. Это самый мощный инструмент для управления поведением LLM.',
+   178→          },
+   179→        ],
+   180→        furtherReading: [
+   181→          { topic: 'Как работают токены', slug: 'tokens', categorySlug: 'llm-basics' },
+   182→          { topic: 'Контекстное окно', slug: 'context-window', categorySlug: 'llm-basics' },
+   183→          { topic: 'Архитектура Transformer', slug: 'transformer', categorySlug: 'llm-basics' },
+   184→          { topic: 'Prompt Engineering', slug: 'zero-shot', categorySlug: 'prompt-engineering' },
+   185→        ],
+   186→      },
+   187→      {
+   188→        slug: 'tokens',
+   189→        title: 'Как работают токены',
+   190→        categorySlug: 'llm-basics',
+   191→        introduction: {
+   192→          what: 'Токенизация — это процесс разбиения текста на минимальные единицы (токены), которые модель может обрабатывать численно. Токен может быть целым словом, частью слова, слогом или даже одиночным символом. LLM не работает с текстом напрямую — она работает с числовыми представлениями токенов.',
+   193→          why: 'Токенизация необходима, потому что нейронные сети оперируют числами, а не символами. Без токенизации невозможно подать текст на вход модели. Качество токенизации напрямую влияет на эффективность модели: чем лучше токенизатор, тем меньше токенов требуется для представления текста, и тем больше информации помещается в контекстное окно.',
+   194→          where: 'Токенизация используется при каждом взаимодействии с LLM: когда вы отправляете запрос, текст токенизируется перед подачей в модель; когда модель генерирует ответ, токены детокенизируются обратно в текст. Все API LLM тарифицируются по количеству токенов.',
+   195→          problem: 'Токенизация решает проблему представления произвольного текста в числовой форме, понятной нейронной сети. Без токенизации модель не могла бы обрабатывать текст переменной длины, работать с разными языками или оценивать стоимость обработки запроса.',
+   196→        },
+   197→        theory: {
+   198→          terms: [
+   199→            { term: 'BPE (Byte Pair Encoding)', definition: 'Алгоритм токенизации, который итеративно объединяет наиболее частые пары байтов. Используется в GPT-моделях.' },
+   200→            { term: 'Vocabulary', definition: 'Словарь всех возможных токенов, которые модель распознаёт. Типичный размер словаря — 30 000–100 000 токенов.' },
+   201→            { term: 'Token ID', definition: 'Уникальный числовой идентификатор каждого токена в словаре модели. Именно эти числа подаются на вход нейронной сети.' },
+   202→            { term: 'Специальные токены', definition: 'Зарезервированные токены вроде <BOS>, <EOS>, <PAD>, которые обозначают начало, конец последовательности и заполнение.' },
+   203→            { term: 'Subword tokenization', definition: 'Подход, при котором редкие слова разбиваются на более мелкие подслова. Балансирует между посимвольной и пословной токенизацией.' },
+   204→          ],
+   205→          principles: 'Токенизация работает по принципу поиска оптимального разбиения текста на фрагменты из словаря модели. Алгоритм BPE начинает с посимвольного представления и итеративно объединяет наиболее часто встречающиеся пары. Например, «неделя» может быть одним токеном, а «сверхдержава» — тремя: «сверх», «дер», «жава». Английский текст обычно токенизируется эффективнее: 1 токен ≈ 4 символа. Русский текст менее эффективен: 1 токен ≈ 2-3 символа из-за меньшего представления в обучающих данных.',
+   206→          architecture: 'Токенизатор — это отдельный компонент конвейера LLM, обучаемый перед обучением основной модели. Сначала на корпусе текстов подсчитываются частоты всех пар символов. Затем итеративно объединяются самые частые пары, пока словарь не достигнет заданного размера. При инференсе текст обрабатывается жадным алгоритмом: токенизатор ищет самое длинное совпадение в словаре слева направо. Результат — последовательность целых чисел (Token ID), которая подаётся на embedding-слой модели.',
+   207→          connections: 'Токенизация напрямую связана с контекстным окном (количество токенов ограничено), влияет на стоимость API (оплата за токены), определяет эффективность RAG (чем больше токенов занимает документ, тем меньше документов можно обработать) и влияет на качество Prompt Engineering (оптимальная формулировка экономит токены).',
+   208→        },
+   209→        diagram: {
+   210→          type: 'pipeline',
+   211→          title: 'Конвейер токенизации',
+   212→          svgContent: `<svg viewBox="0 0 600 390" xmlns="http://www.w3.org/2000/svg" class="w-full">
+   213→  <rect x="10" y="10" width="580" height="370" rx="12" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+   214→  <text x="300" y="38" text-anchor="middle" fill="var(--foreground)" font-size="15" font-weight="bold">Конвейер токенизации</text>
+   215→  <!-- Шаг 1 -->
+   216→  <rect x="30" y="55" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   217→  <circle cx="55" cy="82" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+   218→  <text x="55" y="87" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">1</text>
+   219→  <text x="80" y="77" fill="var(--foreground)" font-size="12" font-weight="bold">Исходный текст</text>
+   220→  <text x="80" y="95" fill="var(--muted-foreground)" font-size="10">"Hello world" или "Привет мир"</text>
+   221→  <!-- Connector -->
+   222→  <line x1="55" y1="110" x2="55" y2="125" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   223→  <!-- Шаг 2 -->
+   224→  <rect x="30" y="125" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.1" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+   225→  <circle cx="55" cy="152" r="14" fill="oklch(0.75 0.15 75)" opacity="0.25"/>
+   226→  <text x="55" y="157" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">2</text>
+   227→  <text x="80" y="147" fill="var(--foreground)" font-size="12" font-weight="bold">BPE алгоритм</text>
+   228→  <text x="80" y="165" fill="var(--muted-foreground)" font-size="10">Итеративное объединение частых пар байтов по словарю</text>
+   229→  <!-- Connector -->
+   230→  <line x1="55" y1="180" x2="55" y2="195" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   231→  <!-- Шаг 3 -->
+   232→  <rect x="30" y="195" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   233→  <circle cx="55" cy="222" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+   234→  <text x="55" y="227" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">3</text>
+   235→  <text x="80" y="217" fill="var(--foreground)" font-size="12" font-weight="bold">Token IDs</text>
+   236→  <text x="80" y="235" fill="var(--muted-foreground)" font-size="10">[15496, 995] — числовые идентификаторы из словаря</text>
+   237→  <!-- Connector -->
+   238→  <line x1="55" y1="250" x2="55" y2="265" stroke="oklch(0.6 0.2 280)" stroke-width="1.5" opacity="0.3"/>
+   239→  <!-- Шаг 4 -->
+   240→  <rect x="30" y="265" width="540" height="55" rx="8" fill="oklch(0.6 0.2 280)" opacity="0.08" stroke="oklch(0.6 0.2 280)" stroke-width="1.5"/>
+   241→  <circle cx="55" cy="292" r="14" fill="oklch(0.6 0.2 280)" opacity="0.2"/>
+   242→  <text x="55" y="297" text-anchor="middle" fill="oklch(0.6 0.2 280)" font-size="12" font-weight="bold">4</text>
+   243→  <text x="80" y="287" fill="var(--foreground)" font-size="12" font-weight="bold">Векторизация</text>
+   244→  <text x="80" y="305" fill="var(--muted-foreground)" font-size="10">Token IDs превращаются в Embedding vectors для подачи в модель</text>
+   245→  <!-- Bottom insight -->
+   246→  <rect x="30" y="335" width="540" height="40" rx="6" fill="var(--muted)" opacity="0.3"/>
+   247→  <text x="300" y="360" text-anchor="middle" fill="var(--foreground)" font-size="10" font-weight="bold">Английский ~4 символа/токен, русский ~2-3 символа/токен</text>
+   248→</svg>`,
+   249→        },
+   250→        practicalExamples: [
+   251→          {
+   252→            title: 'Подсчёт токенов с помощью tiktoken',
+   253→            description: 'Библиотека tiktoken от OpenAI позволяет точно подсчитать количество токенов для моделей GPT.',
+   254→            code: `import { encoding_for_model } from 'tiktoken';
+   255→
+   256→const enc = encoding_for_model('gpt-4');
+   257→
+   258→const russianText = 'Привет! Как у тебя дела сегодня?';
+   259→const englishText = 'Hello! How are you doing today?';
+   260→
+   261→console.log('Русский:', enc.encode(russianText).length, 'токенов');
+   262→console.log('Английский:', enc.encode(englishText).length, 'токенов');
+   263→
+   264→enc.free();`,
+   265→            language: 'typescript',
+   266→          },
+   267→          {
+   268→            title: 'Оценка стоимости API-запроса',
+   269→            description: 'Расчёт стоимости запроса к LLM API на основе количества токенов.',
+   270→            code: `function estimateCost(inputTokens: number, outputTokens: number, 
+   271→                model: string): number {
+   272→  const prices: Record<string, { input: number; output: number }> = {
+   273→    'gpt-4': { input: 0.03 / 1000, output: 0.06 / 1000 },
+   274→    'gpt-4-turbo': { input: 0.01 / 1000, output: 0.03 / 1000 },
+   275→    'gpt-3.5-turbo': { input: 0.0005 / 1000, output: 0.0015 / 1000 },
+   276→  };
+   277→  
+   278→  const price = prices[model];
+   279→  if (!price) throw new Error(\`Неизвестная модель: \${model}\`);
+   280→  
+   281→  return inputTokens * price.input + outputTokens * price.output;
+   282→}
+   283→
+   284→// Пример: 500 входных + 200 выходных токенов на GPT-4
+   285→const cost = estimateCost(500, 200, 'gpt-4');
+   286→console.log(\`Стоимость: $\${cost.toFixed(4)}\`);`,
+   287→            language: 'typescript',
+   288→          },
+   289→        ],
+   290→        sandboxes: [
+   291→          {
+   292→            type: 'tokenizer',
+   293→            title: 'Попробуйте токенизацию',
+   294→            description: 'Введите текст и увидите, как он разбивается на токены. Попробуйте русский и английский текст, чтобы увидеть разницу.',
+   295→            defaultPrompt: 'Привет! Как у тебя дела сегодня? Hello world!',
+   296→          },
+   297→        ],
+   298→        commonMistakes: [
+   299→          {
+   300→            mistake: 'Считать, что 1 слово = 1 токен',
+   301→            explanation: 'Это распространённое заблуждение. В английском 1 токен ≈ 0.75 слова, а в русском 1 токен может быть частью слова. Слово «информатика» может разбиться на 2-3 токена.',
+   302→            correctApproach: 'Используйте tiktoken или токенайзер модели для точного подсчёта. Для оценки: английский текст ≈ 1.3 токена на слово, русский ≈ 2-3 токена на слово.',
+   303→          },
+   304→          {
+   305→            mistake: 'Не учитывать токены системного промпта',
+   306→            explanation: 'Системный промпт тоже состоит из токенов и занимает часть контекстного окна. Длинный системный промпт может «съесть» значительную часть доступного контекста.',
+   307→            correctApproach: 'Всегда включайте системный промпт в расчёт общего количества токенов. Оптимизируйте системный промпт — делайте его кратким, но точным.',
+   308→          },
+   309→        ],
+   310→        furtherReading: [
+   311→          { topic: 'Контекстное окно', slug: 'context-window', categorySlug: 'llm-basics' },
+   312→          { topic: 'Архитектура Transformer', slug: 'transformer', categorySlug: 'llm-basics' },
+   313→          { topic: 'Prompt Engineering', slug: 'zero-shot', categorySlug: 'prompt-engineering' },
+   314→        ],
+   315→      },
+   316→      {
+   317→        slug: 'context-window',
+   318→        title: 'Контекстное окно',
+   319→        categorySlug: 'llm-basics',
+   320→        introduction: {
+   321→          what: 'Контекстное окно (context window) — это максимальное количество токенов, которое LLM может обработать за один запрос. Оно включает как входной текст (промпт), так и выходной (генерируемый ответ). Это фундаментальное ограничение архитектуры Transformer, определяющее, сколько информации модель может «держать в голове» одновременно.',
+   322→          why: 'Контекстное окно критически важно, потому что оно определяет возможности модели по работе с длинными текстами. Маленькое окно ограничивает модель короткими диалогами и документами. Большое окно позволяет анализировать целые книги, длинные кодовые базы и вести протяжённые диалоги без потери контекста.',
+   323→          where: 'Ограничения контекстного окна влияют на все сценарии использования LLM: чат-боты (длина истории диалога), анализ документов (размер обрабатываемого файла), RAG-системы (количество извлекаемых фрагментов), код-ассистенты (размер кодового контекста).',
+   324→          problem: 'Контекстное окно решает проблему «памяти» модели. Без него модель не могла бы учитывать предыдущий текст при генерации следующего. Однако квадратичная сложность self-attention делает обработку очень длинных контекстов вычислительно дорогой, что и приводит к ограничению.',
+   325→        },
+   326→        theory: {
+   327→          terms: [
+   328→            { term: 'Context Length', definition: 'Максимальное количество токенов в одной последовательности, которую может обработать модель. GPT-4: 128K, Claude 3: 200K, Gemini: 1M.' },
+   329→            { term: 'KV Cache', definition: 'Кэш ключей и значений внимания, позволяющий не пересчитывать предыдущие токены при генерации нового. Занимает значительную часть GPU-памяти.' },
+   330→            { term: 'Sliding Window Attention', definition: 'Техника, при которой каждый токен обращается только к ограниченному числу предыдущих токенов, а не ко всем. Снижает сложность с O(n²) до O(n·w).' },
+   331→            { term: 'Context Overflow', definition: 'Ситуация, когда суммарное количество токенов запроса и ожидаемого ответа превышает контекстное окно модели.' },
+   332→            { term: 'RoPE (Rotary Position Embedding)', definition: 'Метод кодирования позиции токена, позволяющий модели экстраполировать на более длинные последовательности, чем при обучении.' },
+   333→          ],
+   334→          principles: 'Контекстное окно ограничено вычислительной сложностью механизма self-attention: для последовательности длины n каждый токен должен вычислить внимание ко всем n токенам, что даёт O(n²) операций. С ростом длины контекста требования к памяти и вычислениям растут квадратично. Современные модели используют различные техники для расширения эффективного контекста: Grouped Query Attention снижает нагрузку на KV Cache, а Ring Attention позволяет распределять обработку длинного контекста между несколькими GPU.',
+   335→          architecture: 'Размер контекстного окна определяется на этапе проектирования модели и фиксируется при обучении. Он зависит от размера KV Cache (который хранит промежуточные вычисления внимания) и доступной GPU-памяти. При инференсе модель выделяет память под KV Cache пропорционально длине входного текста. По мере генерации ответа кэш растёт, и при приближении к лимиту модель должна остановить генерацию или обрезать начало контекста.',
+   336→          connections: 'Контекстное окно напрямую связано с RAG (выборка фрагментов вместо загрузки всего документа), Context Engineering (оптимизация использования доступного контекста), Prompt Engineering (компактные формулировки) и Local AI (ограничения GPU-памяти при локальном запуске).',
+   337→        },
+   338→        diagram: {
+   339→          type: 'comparison',
+   340→          title: 'Сравнение контекстных окон моделей',
+   341→          svgContent: `<svg viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg" class="w-full">
+   342→  <rect x="10" y="10" width="580" height="440" rx="12" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+   343→  <text x="300" y="38" text-anchor="middle" fill="var(--foreground)" font-size="15" font-weight="bold">Сравнение контекстных окон</text>
+   344→  <!-- Шаг 1 -->
+   345→  <rect x="30" y="55" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   346→  <circle cx="55" cy="82" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+   347→  <text x="55" y="87" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">1</text>
+   348→  <text x="80" y="77" fill="var(--foreground)" font-size="12" font-weight="bold">GPT-3.5 — 4K токенов</text>
+   349→  <text x="80" y="95" fill="var(--muted-foreground)" font-size="10">Короткий диалог, несколько абзацев</text>
+   350→  <!-- Connector -->
+   351→  <line x1="55" y1="110" x2="55" y2="125" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   352→  <!-- Шаг 2 -->
+   353→  <rect x="30" y="125" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.12" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   354→  <circle cx="55" cy="152" r="14" fill="oklch(0.55 0.15 165)" opacity="0.25"/>
+   355→  <text x="55" y="157" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">2</text>
+   356→  <text x="80" y="147" fill="var(--foreground)" font-size="12" font-weight="bold">GPT-4 — 128K токенов</text>
+   357→  <text x="80" y="165" fill="var(--muted-foreground)" font-size="10">300 страниц = 1 книга</text>
+   358→  <!-- Connector -->
+   359→  <line x1="55" y1="180" x2="55" y2="195" stroke="oklch(0.75 0.15 75)" stroke-width="1.5" opacity="0.3"/>
+   360→  <!-- Шаг 3 -->
+   361→  <rect x="30" y="195" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.1" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+   362→  <circle cx="55" cy="222" r="14" fill="oklch(0.75 0.15 75)" opacity="0.25"/>
+   363→  <text x="55" y="227" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">3</text>
+   364→  <text x="80" y="217" fill="var(--foreground)" font-size="12" font-weight="bold">Claude 3 — 200K токенов</text>
+   365→  <text x="80" y="235" fill="var(--muted-foreground)" font-size="10">Длинные документы и отчёты</text>
+   366→  <!-- Connector -->
+   367→  <line x1="55" y1="250" x2="55" y2="265" stroke="oklch(0.75 0.15 75)" stroke-width="1.5" opacity="0.3"/>
+   368→  <!-- Шаг 4 -->
+   369→  <rect x="30" y="265" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.15" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+   370→  <circle cx="55" cy="292" r="14" fill="oklch(0.75 0.15 75)" opacity="0.3"/>
+   371→  <text x="55" y="297" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">4</text>
+   372→  <text x="80" y="287" fill="var(--foreground)" font-size="12" font-weight="bold">Gemini — 1M токенов</text>
+   373→  <text x="80" y="305" fill="var(--muted-foreground)" font-size="10">Целая библиотека текстов</text>
+   374→  <!-- Connector -->
+   375→  <line x1="55" y1="320" x2="55" y2="335" stroke="oklch(0.6 0.2 280)" stroke-width="1.5" opacity="0.3"/>
+   376→  <!-- Шаг 5 -->
+   377→  <rect x="30" y="335" width="540" height="55" rx="8" fill="oklch(0.6 0.2 280)" opacity="0.08" stroke="oklch(0.6 0.2 280)" stroke-width="1.5"/>
+   378→  <circle cx="55" cy="362" r="14" fill="oklch(0.6 0.2 280)" opacity="0.2"/>
+   379→  <text x="55" y="367" text-anchor="middle" fill="oklch(0.6 0.2 280)" font-size="12" font-weight="bold">5</text>
+   380→  <text x="80" y="357" fill="var(--foreground)" font-size="12" font-weight="bold">Расширение памяти</text>
+   381→  <text x="80" y="375" fill="var(--muted-foreground)" font-size="10">RAG + Суммаризация + Sliding Window + KV Cache оптимизация</text>
+   382→  <!-- Bottom insight -->
+   383→  <rect x="30" y="405" width="540" height="40" rx="6" fill="var(--muted)" opacity="0.3"/>
+   384→  <text x="300" y="430" text-anchor="middle" fill="var(--foreground)" font-size="10" font-weight="bold">Больше окно = больше контекст, но квадратичная сложность внимания ограничивает рост</text>
+   385→</svg>`,
+   386→        },
+   387→        practicalExamples: [
+   388→          {
+   389→            title: 'Управление историей диалога',
+   390→            description: 'При длинном диалоге необходимо управлять контекстным окном, чтобы не превысить лимит модели.',
+   391→            code: `interface Message { role: string; content: string; }
+   392→
+   393→function trimConversation(messages: Message[], maxTokens: number, 
+   394→                          tokenizer: (text: string) => number): Message[] {
+   395→  let totalTokens = 0;
+   396→  const result: Message[] = [];
+   397→  
+   398→  // Системный промпт всегда первый
+   399→  if (messages[0]?.role === 'system') {
+   400→    totalTokens += tokenizer(messages[0].content);
+   401→    result.push(messages[0]);
+   402→  }
+   403→  
+   404→  // Добавляем сообщения с конца, пока не превысим лимит
+   405→  for (let i = messages.length - 1; i >= 1; i--) {
+   406→    const tokens = tokenizer(messages[i].content);
+   407→    if (totalTokens + tokens > maxTokens * 0.8) break; // 80% лимита
+   408→    totalTokens += tokens;
+   409→    result.splice(1, 0, messages[i]); // Вставляем после system
+   410→  }
+   411→  
+   412→  return result;
+   413→}`,
+   414→            language: 'typescript',
+   415→          },
+   416→        ],
+   417→        sandboxes: [
+   418→          {
+   419→            type: 'temperature',
+   420→            title: 'Как температура влияет на ответы',
+   421→            description: 'Попробуйте один и тот же запрос при разной температуре и сравните результаты. Низкая температура — точные ответы, высокая — креативные.',
+   422→            defaultPrompt: 'Напиши короткую историю о роботе',
+   423→            defaultTemperature: 0.7,
+   424→          },
+   425→        ],
+   426→        commonMistakes: [
+   427→          {
+   428→            mistake: 'Не обрезать историю диалога',
+   429→            explanation: 'Если не управлять историей, диалог быстро превысит контекстное окно, и API вернёт ошибку или молча обрежет начало.',
+   430→            correctApproach: 'Реализуйте стратегию обрезки: удаляйте старые сообщения, суммаризируйте историю или используйте скользящее окно. Оставляйте системный промпт и последние N сообщений.',
+   431→          },
+   432→          {
+   433→            mistake: 'Загружать весь документ в контекст',
+   434→            explanation: 'Для анализа большого документа некоторые пытаются загрузить весь текст в промпт. Это неэффективно и часто превышает лимит.',
+   435→            correctApproach: 'Используйте RAG: разбейте документ на фрагменты, найдите релевантные через векторный поиск и подайте только их в контекст модели.',
+   436→          },
+   437→        ],
+   438→        furtherReading: [
+   439→          { topic: 'Архитектура Transformer', slug: 'transformer', categorySlug: 'llm-basics' },
+   440→          { topic: 'RAG — Embeddings', slug: 'embeddings', categorySlug: 'rag' },
+   441→          { topic: 'Context Engineering', slug: 'context', categorySlug: 'context-engineering' },
+   442→        ],
+   443→      },
+   444→      {
+   445→        slug: 'transformer',
+   446→        title: 'Архитектура Transformer',
+   447→        categorySlug: 'llm-basics',
+   448→        introduction: {
+   449→          what: 'Transformer — это архитектура нейронной сети, представленная в 2017 году в статье «Attention Is All You Need». Она произвела революцию в обработке естественного языка и стала основой для всех современных LLM: GPT, BERT, Llama, Claude и других. Ключевая инновация — механизм self-attention, позволяющий модели учитывать взаимосвязи между всеми элементами последовательности одновременно.',
+   450→          why: 'До Transformer модели обрабатывали текст последовательно (RNN/LSTM), что было медленно и не позволяло улавливать дальние связи в тексте. Transformer решает обе проблемы: параллельная обработка делает обучение быстрым, а attention позволяет каждому токену «видеть» все остальные токены в последовательности.',
+   451→          where: 'Transformer используется не только в NLP, но и в компьютерном зрении (ViT), генерации изображений (DiT), аудио, видео и даже в биологии (AlphaFold). В мире LLM это де-факто стандарт — все современные языковые модели построены на Transformer.',
+   452→          problem: 'Transformer решает проблему параллелизма при обработке последовательностей. RNN обрабатывали токены по одному, что делало обучение на длинных текстах непрактичным. Transformer обрабатывает все токены одновременно, что позволяет эффективно использовать GPU и обучать модели на триллионах токенов.',
+   453→        },
+   454→        theory: {
+   455→          terms: [
+   456→            { term: 'Self-Attention', definition: 'Механизм, вычисляющий «внимание» каждого токена ко всем остальным. Позволяет модели понимать, какие слова в предложении связаны друг с другом, даже если они стоят далеко.' },
+   457→            { term: 'Multi-Head Attention', definition: 'Несколько параллельных attention-голов, каждая из которых изучает разные типы связей. Например, одна голова отслеживает синтаксис, другая — семантику.' },
+   458→            { term: 'Positional Encoding', definition: 'Добавление информации о позиции токена к его embedding, поскольку Transformer не имеет встроенного понимания порядка элементов.' },
+   459→            { term: 'Feed-Forward Network', definition: 'Полносвязная нейронная сеть, применяемая к каждому токену отдельно после attention. Состоит из двух линейных слоёв с ReLU/GELU между ними.' },
+   460→            { term: 'Layer Normalization', definition: 'Нормализация активаций в каждом слое, стабилизирующая обучение. В современных моделях применяется Pre-Norm вариант (нормализация до attention).' },
+   461→            { term: 'Residual Connection', definition: 'Добавление входа слоя к его выходу (x + F(x)). Упрощает обучение глубоких сетей, обеспечивая прямой путь для градиента.' },
+   462→          ],
+   463→          principles: 'Transformer работает следующим образом: входная последовательность токенов проходит через embedding-слой, преобразуясь в векторы. К ним добавляются позиционные кодировки. Затем данные проходят через N одинаковых слоёв, каждый из которых содержит блок multi-head self-attention и feed-forward сеть с residual connections и layer normalization. В декодерных моделях (GPT) применяется маска, не позволяющая токенам «заглядывать вперёд». Выход последнего слоя проецируется через LM Head на словарь с softmax для получения вероятностей следующего токена.',
+   464→          architecture: 'Архитектура Transformer-декодера (используемая в GPT): вход → token embedding + positional encoding → N × [masked self-attention → add & norm → feed-forward → add & norm] → linear projection → softmax. Ключевые размеры: d_model (размерность скрытого состояния, обычно 768-12288), n_heads (количество голов внимания, 12-96), d_ff (размерность feed-forward, обычно 4×d_model). Количество слоёв варьируется от 12 (GPT-2) до 96+ (GPT-4). Общее количество параметров ≈ d_model² × 12 × n_layers.',
+   465→          connections: 'Transformer — фундамент для всех тем этого курса. Prompt Engineering управляет входом Transformer, RAG расширяет его контекст внешними данными, AI Agents используют Transformer для планирования и рассуждений, а MCP подключает к Transformer внешние инструменты.',
+   466→        },
+   467→        diagram: {
+   468→          type: 'architecture',
+   469→          title: 'Блок Transformer-декодера',
+   470→          svgContent: `<svg viewBox="0 0 600 530" xmlns="http://www.w3.org/2000/svg" class="w-full">
+   471→  <rect x="10" y="10" width="580" height="510" rx="12" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+   472→  <text x="300" y="38" text-anchor="middle" fill="var(--foreground)" font-size="15" font-weight="bold">Архитектура Transformer</text>
+   473→  <!-- Шаг 1 -->
+   474→  <rect x="30" y="55" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   475→  <circle cx="55" cy="82" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+   476→  <text x="55" y="87" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">1</text>
+   477→  <text x="80" y="77" fill="var(--foreground)" font-size="12" font-weight="bold">Input Embedding</text>
+   478→  <text x="80" y="95" fill="var(--muted-foreground)" font-size="10">Токены превращаются в векторные представления + позиционное кодирование</text>
+   479→  <!-- Connector -->
+   480→  <line x1="55" y1="110" x2="55" y2="125" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   481→  <!-- Шаг 2 -->
+   482→  <rect x="30" y="125" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.1" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+   483→  <circle cx="55" cy="152" r="14" fill="oklch(0.75 0.15 75)" opacity="0.25"/>
+   484→  <text x="55" y="157" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">2</text>
+   485→  <text x="80" y="147" fill="var(--foreground)" font-size="12" font-weight="bold">Multi-Head Self-Attention</text>
+   486→  <text x="80" y="165" fill="var(--muted-foreground)" font-size="10">Каждый токен «смотрит» на все остальные через Query, Key, Value</text>
+   487→  <!-- Connector -->
+   488→  <line x1="55" y1="180" x2="55" y2="195" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   489→  <!-- Шаг 3 -->
+   490→  <rect x="30" y="195" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.08" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   491→  <circle cx="55" cy="222" r="14" fill="oklch(0.55 0.15 165)" opacity="0.2"/>
+   492→  <text x="55" y="227" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">3</text>
+   493→  <text x="80" y="217" fill="var(--foreground)" font-size="12" font-weight="bold">Feed-Forward Network</text>
+   494→  <text x="80" y="235" fill="var(--muted-foreground)" font-size="10">Двухслойная нейросеть применяется к каждой позиции</text>
+   495→  <!-- Connector -->
+   496→  <line x1="55" y1="250" x2="55" y2="265" stroke="oklch(0.55 0.15 165)" stroke-width="1.5" opacity="0.3"/>
+   497→  <!-- Шаг 4 -->
+   498→  <rect x="30" y="265" width="540" height="55" rx="8" fill="oklch(0.55 0.15 165)" opacity="0.12" stroke="oklch(0.55 0.15 165)" stroke-width="1.5"/>
+   499→  <circle cx="55" cy="292" r="14" fill="oklch(0.55 0.15 165)" opacity="0.25"/>
+   500→  <text x="55" y="297" text-anchor="middle" fill="oklch(0.55 0.15 165)" font-size="12" font-weight="bold">4</text>
+   501→  <text x="80" y="287" fill="var(--foreground)" font-size="12" font-weight="bold">Layer Norm + Residual</text>
+   502→  <text x="80" y="305" fill="var(--muted-foreground)" font-size="10">Нормализация + обходной путь для стабильности обучения</text>
+   503→  <!-- Connector -->
+   504→  <line x1="55" y1="320" x2="55" y2="335" stroke="oklch(0.75 0.15 75)" stroke-width="1.5" opacity="0.3"/>
+   505→  <!-- Шаг 5 -->
+   506→  <rect x="30" y="335" width="540" height="55" rx="8" fill="oklch(0.75 0.15 75)" opacity="0.15" stroke="oklch(0.75 0.15 75)" stroke-width="1.5"/>
+   507→  <circle cx="55" cy="362" r="14" fill="oklch(0.75 0.15 75)" opacity="0.3"/>
+   508→  <text x="55" y="367" text-anchor="middle" fill="oklch(0.75 0.15 75)" font-size="12" font-weight="bold">5</text>
+   509→  <text x="80" y="357" fill="var(--foreground)" font-size="12" font-weight="bold">Стек N слоёв</text>
+   510→  <text x="80" y="375" fill="var(--muted-foreground)" font-size="10">Шаги 2-4 повторяются N раз (6-96 слоёв)</text>
+   511→  <!-- Connector -->
+   512→  <line x1="55" y1="390" x2="55" y2="405" stroke="oklch(0.6 0.2 280)" stroke-width="1.5" opacity="0.3"/>
+   513→  <!-- Шаг 6 -->
+   514→  <rect x="30" y="405" width="540" height="55" rx="8" fill="oklch(0.6 0.2 280)" opacity="0.08" stroke="oklch(0.6 0.2 280)" stroke-width="1.5"/>
+   515→  <circle cx="55" cy="432" r="14" fill="oklch(0.6 0.2 280)" opacity="0.2"/>
+   516→  <text x="55" y="437" text-anchor="middle" fill="oklch(0.6 0.2 280)" font-size="12" font-weight="bold">6</text>
+   517→  <text x="80" y="427" fill="var(--foreground)" font-size="12" font-weight="bold">Выход</text>
+   518→  <text x="80" y="445" fill="var(--muted-foreground)" font-size="10">Вероятности следующего токена через Linear + Softmax</text>
+   519→  <!-- Bottom insight -->
+   520→  <rect x="30" y="475" width="540" height="40" rx="6" fill="var(--muted)" opacity="0.3"/>
+   521→  <text x="300" y="500" text-anchor="middle" fill="var(--foreground)" font-size="10" font-weight="bold">Transformer = стек слоёв Attention + FFN с residual связями</text>
+   522→</svg>`,
+   523→        },
+   524→        practicalExamples: [
+   525→          {
+   526→            title: 'Визуализация внимания',
+   527→            description: 'Пример того, как механизм attention определяет связи между словами в предложении.',
+   528→            code: `// Упрощённая реализация Self-Attention
+   529→function selfAttention(Q: number[][], K: number[][], V: number[][]) {
+   530→  const d_k = K[0].length;
+   531→  
+   532→  // Q × K^T / sqrt(d_k)
+   533→  const scores = matMul(Q, transpose(K))
+   534→    .map(row => row.map(val => val / Math.sqrt(d_k)));
+   535→  
+   536→  // Softmax по строкам
+   537→  const attention = scores.map(row => softmax(row));
+   538→  
+   539→  // Attention × V
+   540→  const output = matMul(attention, V);
+   541→  
+   542→  return { output, attention };
+   543→}
+   544→
+   545→// Результат attention показывает, какие токены
+   546→// "внимают" друг другу:
+   547→// "Кот сидит на ковре, он его любит"
+   548→//   ↑                    ↑  ↑
+   549→//   └── attention ───────┘  └── "он" → "кот"
+   550→//                          "его" → "ковёр"`,
+   551→            language: 'typescript',
+   552→          },
+   553→        ],
+   554→        sandboxes: [
+   555→          {
+   556→            type: 'prompt-playground',
+   557→            title: 'Спросите про Transformer',
+   558→            description: 'Задайте вопрос про архитектуру Transformer и механизм внимания, и получите ответ от AI.',
+   559→            defaultPrompt: 'Как работает механизм self-attention в Transformer?',
+   560→            defaultSystem: 'Ты эксперт по архитектуре нейронных сетей. Объясняй Transformer, attention и механизмы обучения просто и точно.',
+   561→          },
+   562→        ],
+   563→        commonMistakes: [
+   564→          {
+   565→            mistake: 'Путать encoder и decoder Transformer',
+   566→            explanation: 'Оригинальный Transformer имел encoder и decoder. BERT использует только encoder (двунаправленный), а GPT — только decoder (авторегрессионный с маской). Они работают по-разному.',
+   567→            correctApproach: 'Для генерации текста используется decoder (GPT-style). Для классификации и поиска — encoder (BERT-style). Понимайте разницу: encoder видит весь текст, decoder — только левую часть.',
+   568→          },
+   569→          {
+   570→            mistake: 'Думать, что больше слоёв = лучше',
+   571→            explanation: 'Больше слоёв не всегда лучше. Слишком глубокая модель может переобучиться, требовать экспоненциально больше ресурсов и страдать от затухания градиентов.',
+   572→            correctApproach: 'Оптимальная глубина зависит от задачи и объёма данных. Современные модели используют 32-96 слоёв, но с residual connections, layer norm и правильной инициализацией.',
+   573→          },
+   574→        ],
+   575→        furtherReading: [
+   576→          { topic: 'Что такое LLM', slug: 'what-is-llm', categorySlug: 'llm-basics' },
+   577→          { topic: 'Как работают токены', slug: 'tokens', categorySlug: 'llm-basics' },
+   578→          { topic: 'Prompt Engineering — Zero-shot', slug: 'zero-shot', categorySlug: 'prompt-engineering' },
+   579→        ],
+   580→      },
+   581→    ],
+   582→  },
+   583→  promptEngineering,
+   584→  contextEngineering,
+   585→  mcp,
+   586→  rag,
+   587→  aiAgents,
+   588→  localAI,
+   589→  productionAI,
+   590→];
+   591→
