@@ -5,7 +5,7 @@ import { useNavigationStore } from '@/store/navigation-store';
 import { useProgressStore } from '@/store/progress-store';
 import {
   Server, Key, Shield, Swords, Scissors, Route, Shrink, FileText, ShieldCheck,
-  ArrowRight, Sparkles, BookOpen, MessageCircle, Cpu, KeyRound, HelpCircle, Trophy, Flame,
+  ArrowRight, Sparkles, BookOpen, MessageCircle, Cpu, KeyRound, HelpCircle,
   RotateCcw,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,9 +34,6 @@ export function HomeView() {
   const totalSubtopics = topics.reduce((acc, t) => acc + t.subtopics.length, 0);
   const overallProgress = useProgressStore(s => s.getOverallProgress(totalSubtopics));
   const completedCount = useProgressStore(s => s.completedSubtopics.length);
-  const xp = useProgressStore(s => s.xp);
-  const level = useProgressStore(s => s.level);
-  const streak = useProgressStore(s => s.streak);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 md:py-12">
@@ -82,21 +79,29 @@ export function HomeView() {
         transition={{ delay: 0.2 }}
         className="mb-10"
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">Ваш прогресс</h2>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-card">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <span className="text-lg font-bold">{completedCount}/{totalSubtopics}</span>
+            <span className="text-sm text-muted-foreground">изучено</span>
+          </div>
+          <div className="flex-1">
+            <Progress value={overallProgress} className="h-2" />
+          </div>
+          <span className="text-sm text-muted-foreground font-medium">{overallProgress}%</span>
           {overallProgress > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
                   <RotateCcw className="h-3.5 w-3.5" />
-                  Сбросить прогресс
+                  Сбросить
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Сбросить прогресс?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Все просмотренные и изученные темы будут отмечены как непройденные. XP, уровень и серия будут обнулены.
+                    Все просмотренные и изученные темы будут отмечены как непройденные.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -111,28 +116,6 @@ export function HomeView() {
               </AlertDialogContent>
             </AlertDialog>
           )}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-4 rounded-lg border border-border bg-card text-center">
-            <Trophy className="h-5 w-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold">{level}</p>
-            <p className="text-xs text-muted-foreground">Уровень</p>
-          </div>
-          <div className="p-4 rounded-lg border border-border bg-card text-center">
-            <Sparkles className="h-5 w-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold">{xp}</p>
-            <p className="text-xs text-muted-foreground">XP</p>
-          </div>
-          <div className="p-4 rounded-lg border border-border bg-card text-center">
-            <Flame className="h-5 w-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold">{streak}</p>
-            <p className="text-xs text-muted-foreground">Серия</p>
-          </div>
-          <div className="p-4 rounded-lg border border-border bg-card text-center">
-            <BookOpen className="h-5 w-5 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold">{completedCount}/{totalSubtopics}</p>
-            <p className="text-xs text-muted-foreground">Изучено</p>
-          </div>
         </div>
       </motion.div>
 
