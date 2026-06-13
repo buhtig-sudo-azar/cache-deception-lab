@@ -16,9 +16,10 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Cpu, ChevronsUpDown, Check, Loader2 } from 'lucide-react';
+import { Cpu, ChevronsUpDown, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ModelAvailabilityPanel } from './ModelAvailabilityPanel';
 
 const DEFAULT_MODELS = [
   { id: 'moonshotai/kimi-k2.6:free', name: 'Kimi K2.6', label: 'Kimi K2.6 (Free)' },
@@ -28,7 +29,7 @@ const DEFAULT_MODELS = [
 ];
 
 export function ModelSelector() {
-  const { currentModel, setCurrentModel, _hydrate } = useModelStore();
+  const { currentModel, setCurrentModel, _hydrate, rateLimits } = useModelStore();
   const [open, setOpen] = useState(false);
   const [customInput, setCustomInput] = useState('');
   const { toast } = useToast();
@@ -39,12 +40,16 @@ export function ModelSelector() {
 
   const currentLabel = DEFAULT_MODELS.find(m => m.id === currentModel)?.label || currentModel.split('/').pop() || currentModel;
 
+  const currentRateLimit = rateLimits[currentModel];
+  const isCurrentRateLimited = currentRateLimit?.reason === 'rate_limited';
+  const isCurrentUnavailable = currentRateLimit?.available === false && currentRateLimit?.reason !== 'rate_limited';
+
   const applyModel = (model: string) => {
     setCurrentModel(model);
     setOpen(false);
     toast({
-      title: 'Model applied',
-      description: `Active: ${model.split('/').pop()}`,
+      title: 'Модель применена',
+      description: `Активна: ${model.split('/').pop()}`,
     });
   };
 
@@ -63,10 +68,20 @@ export function ModelSelector() {
           size="sm"
           className={cn(
             'gap-1.5 h-8 px-2.5 text-xs font-medium transition-all',
-            'border-primary/20 hover:border-primary/40 hover:bg-primary/5'
+            isCurrentRateLimited
+              ? 'border-amber-500/40 hover:border-amber-500/60 bg-amber-500/5'
+              : isCurrentUnavailable
+                ? 'border-red-500/40 hover:border-red-500/60 bg-red-500/5'
+                : 'border-primary/20 hover:border-primary/40 hover:bg-primary/5'
           )}
         >
-          <Cpu className="h-3 w-3 text-primary" />
+          {isCurrentRateLimited ? (
+            <AlertTriangle className="h-3 w-3 text-amber-500" />
+          ) : isCurrentUnavailable ? (
+            <WifiOff className="h-3 w-3 text-red-500" />
+          ) : (
+            <Cpu className="h-3 w-3 text-primary" />
+          )}
           <span className="max-w-[100px] sm:max-w-[160px] truncate">
             {currentLabel}
           </span>
@@ -74,41 +89,66 @@ export function ModelSelector() {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[320px] p-0" align="end">
+      <PopoverContent className="w-[360px] p-0" align="end">
         <Command>
           <div className="flex items-center border-b border-border px-3">
-            <CommandInput placeholder="Search models..." className="flex-1" />
+            <CommandInput placeholder="Поиск моделей..." className="flex-1" />
           </div>
           <CommandList>
-            <CommandEmpty>No model found</CommandEmpty>
-            <CommandGroup heading="Free Models">
-              {DEFAULT_MODELS.map((model) => (
-                <CommandItem
-                  key={model.id}
-                  value={model.label + ' ' + model.id}
-                  onSelect={() => applyModel(model.id)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <Check
+            <CommandEmpty>Модель не найдена</CommandEmpty>
+            <CommandGroup heading="Бесплатные модели">
+              {DEFAULT_MODELS.map((model) => {
+                const info = rateLimits[model.id];
+                const isRateLimited = info?.reason === 'rate_limited';
+                const isUnavailable = info?.available === false;
+                return (
+                  <CommandItem
+                    key={model.id}
+                    value={model.label + ' ' + model.id}
+                    onSelect={() => applyModel(model.id)}
                     className={cn(
-                      'h-3.5 w-3.5 shrink-0',
-                      currentModel === model.id ? 'opacity-100 text-primary' : 'opacity-0'
+                      'flex items-center gap-2 cursor-pointer',
+                      isRateLimited && 'opacity-60',
+                      isUnavailable && 'opacity-40'
                     )}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{model.label}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono truncate">
-                      {model.id}
+                  >
+                    <Check
+                      className={cn(
+                        'h-3.5 w-3.5 shrink-0',
+                        currentModel === model.id ? 'opacity-100 text-primary' : 'opacity-0'
+                      )}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate flex items-center gap-1.5">
+                        {model.label}
+                        {isRateLimited && (
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/10 text-amber-600 font-normal">лимит</span>
+                        )}
+                        {isUnavailable && info?.reason === 'not_found' && (
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-red-500/10 text-red-600 font-normal">недоступна</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground font-mono truncate">
+                        {model.id}
+                      </div>
                     </div>
-                  </div>
-                </CommandItem>
-              ))}
+                    {info?.available && info.remaining !== null && info.remaining !== undefined && (
+                      <span className={cn(
+                        'text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0',
+                        info.remaining < 5 ? 'bg-amber-500/10 text-amber-600' : 'bg-green-500/10 text-green-600'
+                      )}>
+                        {info.remaining}/{info.limit || '?'}
+                      </span>
+                    )}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
 
         <div className="p-3 border-t border-border">
-          <p className="text-[10px] text-muted-foreground mb-2">Custom model ID:</p>
+          <p className="text-[10px] text-muted-foreground mb-2">Пользовательский ID модели:</p>
           <div className="flex gap-2">
             <input
               value={customInput}
@@ -128,7 +168,7 @@ export function ModelSelector() {
               onClick={handleCustomSubmit}
               disabled={!customInput.trim()}
             >
-              Apply
+              Применить
             </Button>
           </div>
         </div>
@@ -136,34 +176,65 @@ export function ModelSelector() {
         <div className="px-3 py-2 border-t border-border">
           <ApiTokenInput />
         </div>
+
+        <ModelAvailabilityPanel />
       </PopoverContent>
     </Popover>
   );
 }
 
 function ApiTokenInput() {
-  const { apiToken, setApiToken, clearApiToken } = useModelStore();
+  const { apiToken, setApiToken, clearApiToken, checkModel } = useModelStore();
   const [inputValue, setInputValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<'valid' | 'invalid' | null>(null);
   const { toast } = useToast();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const token = inputValue.trim();
     if (!token) return;
     setApiToken(token);
     setInputValue('');
     setIsExpanded(false);
     toast({
-      title: 'Token saved',
-      description: 'Your API token will be used for all model requests.',
+      title: 'Токен сохранён',
+      description: 'Ваш API-токен будет использоваться для всех запросов к моделям.',
     });
+  };
+
+  const handleVerify = async () => {
+    if (!apiToken) return;
+    setIsVerifying(true);
+    setVerifyResult(null);
+    try {
+      const result = await checkModel('moonshotai/kimi-k2.6:free');
+      setVerifyResult(result.available ? 'valid' : 'invalid');
+      if (result.available) {
+        toast({
+          title: 'Токен валиден',
+          description: 'API-ключ работает корректно.',
+        });
+      } else {
+        toast({
+          title: 'Токен невалиден',
+          description: 'API-ключ не прошёл проверку. Проверьте правильность ключа.',
+          variant: 'destructive',
+        });
+      }
+    } catch {
+      setVerifyResult('invalid');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleRemove = () => {
     clearApiToken();
+    setVerifyResult(null);
     toast({
-      title: 'Token removed',
-      description: 'Now using the platform shared token.',
+      title: 'Токен удалён',
+      description: 'Теперь используется общий токен платформы.',
     });
   };
 
@@ -177,10 +248,10 @@ function ApiTokenInput() {
           onClick={() => setIsExpanded(true)}
           className="w-full flex items-center justify-center gap-1.5 h-7 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span>+ Add OpenRouter token</span>
+          <span>+ Добавить OpenRouter токен</span>
         </button>
         <p className="text-[10px] text-muted-foreground text-center">
-          Get free key:{' '}
+          Бесплатный ключ:{' '}
           <a
             href="https://openrouter.ai/keys"
             target="_blank"
@@ -201,12 +272,25 @@ function ApiTokenInput() {
           <span className="font-mono text-muted-foreground truncate flex-1">
             {maskedToken}
           </span>
+          {verifyResult === 'valid' && (
+            <Wifi className="w-3 h-3 text-green-500 shrink-0" />
+          )}
+          {verifyResult === 'invalid' && (
+            <WifiOff className="w-3 h-3 text-red-500 shrink-0" />
+          )}
         </div>
+        <button
+          onClick={handleVerify}
+          disabled={isVerifying}
+          className="text-[10px] text-primary hover:underline shrink-0 disabled:opacity-50"
+        >
+          {isVerifying ? '...' : 'Проверить'}
+        </button>
         <button
           onClick={handleRemove}
           className="text-[10px] text-destructive hover:underline shrink-0"
         >
-          Remove
+          Удалить
         </button>
       </div>
     );
@@ -237,7 +321,7 @@ function ApiTokenInput() {
         onClick={handleSave}
         disabled={!inputValue.trim()}
       >
-        Save
+        Сохранить
       </Button>
       <Button
         variant="ghost"
@@ -248,7 +332,7 @@ function ApiTokenInput() {
           setInputValue('');
         }}
       >
-        Cancel
+        Отмена
       </Button>
     </div>
   );
