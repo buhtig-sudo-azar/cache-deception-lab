@@ -51,14 +51,19 @@ export function TopicView() {
       <TopicViewContent subtopic={subtopic} />
 
       <div className="mt-8 pt-6 border-t border-border">
-        <Button
-          onClick={() => markAsCompleted(subtopic.slug)}
-          variant={completed ? 'outline' : 'default'}
-          className="gap-2"
-        >
-          <CheckCircle2 className="h-4 w-4" />
-          {completed ? 'Изучено ✓' : 'Отметить как изученное'}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <Button
+            onClick={() => markAsCompleted(subtopic.slug)}
+            variant={completed ? 'outline' : 'default'}
+            className="gap-2"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {completed ? 'Изучено ✓' : 'Отметить как изученное'}
+          </Button>
+          <span className="text-base text-muted-foreground">
+            {completed ? 'Вы уже изучили эту тему' : 'Нажмите, когда завершите изучение темы (+50 XP)'}
+          </span>
+        </div>
       </div>
     </motion.div>
   );
