@@ -1,0 +1,1232 @@
+     1→import { TopicCategory } from '@/types';
+     2→
+     3→export const topics: TopicCategory[] = [
+     4→  {
+     5→    slug: 'web-caches',
+     6→    title: 'Web Caches',
+     7→    description: 'Фундаментальные концепции веб-кэширования: от базовых принципов до типов кэшей и заголовков управления',
+     8→    iconName: 'Server',
+     9→    subtopics: [
+    10→      {
+    11→        slug: 'what-is-web-cache',
+    12→        title: 'Что такое веб-кэш',
+    13→        categorySlug: 'web-caches',
+    14→        introduction: {
+    15→          what: 'Веб-кэш — это промежуточное хранилище копий веб-ресурсов (HTML-страниц, изображений, скриптов, стилей), которое располагается между клиентом (браузером) и сервером-источником. Когда пользователь запрашивает ресурс, кэш может вернуть сохранённую копию вместо того, чтобы отправлять запрос на сервер. Это аналогично тому, как библиотека хранит популярные книги на видном месте, чтобы каждый раз не ходить в архив.',
+    16→          why: 'Кэширование необходимо по трём причинам: скорость, нагрузка и стоимость. Без кэша каждый запрос пользователя шёл бы на сервер-источник, что создавало бы огромную нагрузку и задержки. Кэш сокращает время ответа с сотен миллисекунд до единиц, снижает нагрузку на сервер в десятки раз и уменьшает затраты на пропускную способность. Для популярных сайтов кэш — это разница между работающим и упавшим сервисом.',
+    17→          where: 'Веб-кэши используются повсеместно: браузеры (Chrome, Firefox) кэшируют ресурсы локально, CDN (Cloudflare, Akamai) кэшируют контент ближе к пользователю, reverse proxy (Nginx, Varnish) кэшируют ответы сервера. Даже корпоративные прокси-серверы кэшируют трафик для экономии канала. Практически каждый HTTP-запрос проходит через хотя бы один кэш.',
+    18→          problem: 'Проблема кэширования в том, что кэш может вернуть устаревший или нежелательный контент. Если кэш сохраняет персональную страницу (профиль, настройки), другой пользователь может получить к ней доступ. Это и есть суть Web Cache Deception — кэш обманывается и отдаёт приватный контент.',
+    19→        },
+    20→        theory: {
+    21→          terms: [
+    22→            { term: 'Cache HIT', definition: 'Запрос найден в кэше, и кэш возвращает сохранённую копию без обращения к серверу-источнику. Это самый быстрый сценарий.' },
+    23→            { term: 'Cache MISS', definition: 'Запрос не найден в кэше, и кэш пересылает запрос на сервер-источник, а затем сохраняет ответ для будущих запросов.' },
+    24→            { term: 'Origin Server', definition: 'Сервер-источник — сервер, на котором реально находится контент. Это конечная точка, куда направляются запросы, если кэш не может их обслужить.' },
+    25→            { term: 'Reverse Proxy', definition: 'Обратный прокси-сервер, расположенный перед сервером-источником. Он принимает запросы от клиентов, может кэшировать ответы и перенаправлять запросы на origin server.' },
+    26→            { term: 'CDN', definition: 'Content Delivery Network — глобальная сеть серверов, которые кэшируют контент ближе к пользователям. Cloudflare, Akamai, Fastly — примеры CDN.' },
+    27→          ],
+    28→          principles: `## Принципы работы веб-кэша
+    29→
+    30→Веб-кэш работает по простой модели: **получить запрос → проверить наличие → вернуть или переслать**. Когда клиент (браузер) отправляет HTTP-запрос, он сначала попадает в кэш. Кэш формирует **ключ** из частей запроса (метод, хост, путь) и ищет сохранённый ответ.
+    31→
+    32→Если ответ найден и не устарел — это **Cache HIT**. Кэш мгновенно возвращает копию. Если ответ не найден — это **Cache MISS**. Кэш пересылает запрос на origin server, получает ответ, сохраняет его и возвращает клиенту.
+    33→
+    34→Критически важно понимать: **кэш не знает семантику контента**. Он не понимает, персональная это страница или публичная. Кэш просто следует правилам: если URL выглядит как статический файл и ответ свежий — кэшируй. Именно это незнание делает возможным Web Cache Deception.
+    35→
+    36→Кэш также учитывает **TTL (Time To Live)** — время жизни кэшированного ответа. Когда TTL истекает, ответ считается устаревшим (stale), и кэш должен проверить его актуальность на сервере.`,
+    37→          architecture: `## Архитектура кэширования
+    38→
+    39→Базовая архитектура включает цепочку: **Клиент → Кэш → Origin Server**. В реальных системах цепочка длиннее:
+    40→
+    41→\`\`\`
+    42→Браузер → CDN (Cloudflare) → Reverse Proxy (Nginx) → Origin Server
+    43→\`\`\`
+    44→
+    45→Каждый уровень может кэшировать независимо. Браузерный кэш — самый быстрый, но самый локальный. CDN кэширует для региона. Reverse proxy кэширует для всех клиентов.
+    46→
+    47→CDN обычно расположен на edge-серверах — точках присутствия, разбросанных по миру. Когда пользователь из Москвы запрашивает сайт, запрос идёт на ближайший edge-сервер CDN, который может вернуть кэшированный ответ, не обращаясь к origin server в США.
+    48→
+    49→Reverse proxy (Nginx, Varnish) стоит прямо перед origin server. Он кэширует ответы для всех клиентов, снижая нагрузку на приложение.`,
+    50→          connections: `## Связи с другими технологиями
+    51→
+    52→Веб-кэширование тесно связано с HTTP-протоколом: заголовки Cache-Control, Vary, Age управляют поведением кэша. Load Balancers часто совмещены с кэшем. WAF (Web Application Firewall) может влиять на кэширование. Понимание кэша необходимо для изучения Web Cache Deception и Cache Poisoning.`,
+    53→        },
+    54→        diagram: {
+    55→          type: 'flowchart',
+    56→          title: 'Поток HTTP-запроса через кэш',
+    57→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+    58→  <defs>
+    59→    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0.05"/></linearGradient>
+    60→    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05"/></linearGradient>
+    61→    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/><stop offset="100%" stop-color="#10b981" stop-opacity="0.05"/></linearGradient>
+    62→    <filter id="s1"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/></filter>
+    63→  </defs>
+    64→  <rect x="30" y="110" width="150" height="100" rx="16" fill="url(#g1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#s1)"/>
+    65→  <circle cx="105" cy="140" r="18" fill="#3b82f6" opacity="0.15"/>
+    66→  <text x="105" y="145" text-anchor="middle" fill="#3b82f6" font-size="16">💻</text>
+    67→  <text x="105" y="175" text-anchor="middle" fill="#3b82f6" font-size="14" font-weight="bold">Клиент</text>
+    68→  <text x="105" y="195" text-anchor="middle" fill="#64748b" font-size="10">Браузер</text>
+    69→  <rect x="325" y="80" width="150" height="160" rx="16" fill="url(#g2)" stroke="#f59e0b" stroke-width="1.5" filter="url(#s1)"/>
+    70→  <circle cx="400" cy="115" r="18" fill="#f59e0b" opacity="0.15"/>
+    71→  <text x="400" y="120" text-anchor="middle" fill="#f59e0b" font-size="16">🗄️</text>
+    72→  <text x="400" y="155" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="bold">Кэш</text>
+    73→  <text x="400" y="175" text-anchor="middle" fill="#64748b" font-size="10">CDN / Proxy</text>
+    74→  <rect x="365" y="195" width="70" height="22" rx="11" fill="#10b981" opacity="0.2"/>
+    75→  <text x="400" y="210" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">HIT</text>
+    76→  <rect x="365" y="220" width="70" height="22" rx="11" fill="#ef4444" opacity="0.2"/>
+    77→  <text x="400" y="235" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">MISS</text>
+    78→  <rect x="620" y="110" width="150" height="100" rx="16" fill="url(#g3)" stroke="#10b981" stroke-width="1.5" filter="url(#s1)"/>
+    79→  <circle cx="695" cy="140" r="18" fill="#10b981" opacity="0.15"/>
+    80→  <text x="695" y="145" text-anchor="middle" fill="#10b981" font-size="16">🖥️</text>
+    81→  <text x="695" y="175" text-anchor="middle" fill="#10b981" font-size="14" font-weight="bold">Origin</text>
+    82→  <text x="695" y="195" text-anchor="middle" fill="#64748b" font-size="10">Сервер-источник</text>
+    83→  <rect x="210" y="145" width="90" height="28" rx="14" fill="#64748b" opacity="0.1" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+    84→  <text x="255" y="164" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">Запрос</text>
+    85→  <rect x="505" y="145" width="90" height="28" rx="14" fill="#64748b" opacity="0.1" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+    86→  <text x="550" y="164" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">Проброс</text>
+    87→</svg>`,
+    88→        },
+    89→        practicalExamples: [
+    90→          {
+    91→            title: 'Cache HIT в действии',
+    92→            description: 'Браузер запрашивает логотип, который уже кэширован. Кэш возвращает копию мгновенно.',
+    93→            code: `# Первый запрос — MISS
+    94→GET /logo.png HTTP/1.1
+    95→Host: example.com
+    96→
+    97→# Ответ сервера (кэш сохраняет)
+    98→HTTP/1.1 200 OK
+    99→Cache-Control: max-age=3600
+   100→Content-Type: image/png
+   101→
+   102→# Второй запрос — HIT (кэш отвечает)
+   103→GET /logo.png HTTP/1.1
+   104→Host: example.com
+   105→
+   106→# Ответ кэша (без обращения к серверу)
+   107→HTTP/1.1 200 OK
+   108→Age: 120
+   109→X-Cache: HIT
+   110→Content-Type: image/png`,
+   111→            language: 'http',
+   112→          },
+   113→        ],
+   114→        sandboxes: [
+   115→          { type: 'cache-flow-sim', title: 'Симулятор потока кэша', description: 'Наблюдайте, как запрос проходит через кэш. Изменяйте URL и заголовки, чтобы увидеть HIT или MISS.' },
+   116→        ],
+   117→        commonMistakes: [
+   118→          { mistake: 'Думать, что кэш проверяет содержимое ответа', explanation: 'Кэш не анализирует содержимое. Он опирается только на URL, заголовки и правила.', correctApproach: 'Помните: кэш работает на уровне URL и заголовков. Он не понимает, персональная страница или публичная.' },
+   119→        ],
+   120→        furtherReading: [
+   121→          { topic: 'Cache Keys', slug: 'what-are-cache-keys', categorySlug: 'cache-keys' },
+   122→        ],
+   123→      },
+   124→      {
+   125→        slug: 'cache-headers',
+   126→        title: 'Заголовки управления кэшем',
+   127→        categorySlug: 'web-caches',
+   128→        introduction: {
+   129→          what: 'HTTP-заголовки управления кэшем — это набор полей в HTTP-запросе и ответе, которые указывают кэшу, как именно обрабатывать данный ресурс. Cache-Control, Vary, Age, X-Cache — это "язык", на котором сервер общается с кэшем, говоря ему: "кэшируй это на 1 час" или "не кэшируй это никогда".',
+   130→          why: 'Без заголовков кэш не знает, что кэшировать, а что нет. Неправильные заголовки — главная причина уязвимостей WCD. Если сервер не отправляет "не кэшируй", кэш может кэшировать всё подряд, включая персональные данные.',
+   131→          where: 'Заголовки используются в каждом HTTP-ответе. Cache-Control — самый важный. Vary указывает, какие заголовки запроса влияют на ключ кэша. Age показывает, сколько секунд ответ хранится в кэше.',
+   132→          problem: 'Проблема в том, что многие серверы не устанавливают правильные заголовки для динамического контента. Страницы профилей, API-эндпоинты и персональные данные часто не имеют Cache-Control: no-store, что позволяет кэшу их сохранить.',
+   133→        },
+   134→        theory: {
+   135→          terms: [
+   136→            { term: 'Cache-Control', definition: 'Главный заголовок управления кэшем. Содержит директивы: max-age, no-cache, no-store, private, public, must-revalidate.' },
+   137→            { term: 'Vary', definition: 'Заголовок, указывающий, какие заголовки запроса должны учитываться при формировании ключа кэша. Vary: Accept-Encoding означает разные кэши для разных кодировок.' },
+   138→            { term: 'no-store', definition: 'Директива, запрещающая кэшу сохранять любой контент ответа. Это самая строгая директива — кэш не должен хранить ничего.' },
+   139→            { term: 'max-age', definition: 'Директива, указывающая максимальное время (в секундах), в течение которого ответ считается свежим. max-age=3600 = 1 час.' },
+   140→          ],
+   141→          principles: `## Принципы заголовков кэша
+   142→
+   143→**Cache-Control** — главный инструмент управления. Он может содержать несколько директив:
+   144→
+   145→- **public** — ответ может кэшироваться любым кэшем (CDN, proxy)
+   146→- **private** — ответ предназначен только для браузера, CDN не должен кэшировать
+   147→- **no-cache** — кэш должен проверять актуальность перед каждым использованием
+   148→- **no-store** — кэш НЕ должен сохранять ответ вообще
+   149→- **max-age=N** — ответ свежий N секунд
+   150→
+   151→Ключевое правило безопасности: **динамический контент должен иметь Cache-Control: no-store, private**. Без этого кэш может сохранить персональную страницу.
+   152→
+   153→**Vary** — ещё один важный заголовок. Если сервер отправляет Vary: Cookie, кэш создаст разные записи для разных значений Cookie. Это важно для персонализированного контента.`,
+   154→          architecture: `## Иерархия директив
+   155→
+   156→Приоритет директив Cache-Control:
+   157→1. no-store — абсолютный запрет (если есть, ничего не кэшируется)
+   158→2. no-cache — кэш может хранить, но должен проверять каждый раз
+   159→3. max-age — кэш хранит указанное время
+   160→4. public/private — определяет, какой тип кэша может хранить
+   161→
+   162→Если сервер не отправляет Cache-Control, кэш использует эвристику: если есть Last-Modified, кэш может считать ресурс кэшируемым на 10% от времени с последнего изменения.`,
+   163→          connections: `## Связи с WCD
+   164→
+   165→Неправильные заголовки — корневая причина WCD. Если бы все серверы правильно использовали Cache-Control: no-store для динамического контента, WCD не существовал бы. Cache Keys и Cache Rules опираются на эти заголовки.`,
+   166→        },
+   167→        diagram: {
+   168→          type: 'flowchart',
+   169→          title: 'Принятие решения кэшем на основе заголовков',
+   170→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350" fill="none">
+   171→  <defs>
+   172→    <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.05"/></linearGradient>
+   173→    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+   174→  </defs>
+   175→  <rect x="220" y="10" width="260" height="45" rx="14" fill="url(#hg)" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh)"/>
+   176→  <text x="350" y="38" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">Получен ответ сервера</text>
+   177→  <rect x="210" y="80" width="280" height="45" rx="14" fill="#f59e0b" opacity="0.1" stroke="#f59e0b" stroke-width="1.5" filter="url(#sh)"/>
+   178→  <text x="350" y="108" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="600">Проверка Cache-Control</text>
+   179→  <rect x="20" y="165" width="190" height="65" rx="14" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#sh)"/>
+   180→  <rect x="30" y="175" width="60" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   181→  <text x="60" y="189" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">no-store</text>
+   182→  <text x="115" y="189" text-anchor="middle" fill="#ef4444" font-size="10">Не кэшировать</text>
+   183→  <text x="115" y="215" text-anchor="middle" fill="#64748b" font-size="9">Абсолютный запрет</text>
+   184→  <rect x="250" y="165" width="200" height="65" rx="14" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#sh)"/>
+   185→  <rect x="260" y="175" width="60" height="20" rx="10" fill="#f59e0b" opacity="0.2"/>
+   186→  <text x="290" y="189" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold">no-cache</text>
+   187→  <text x="370" y="189" text-anchor="middle" fill="#f59e0b" font-size="10">Проверять каждый раз</text>
+   188→  <text x="350" y="215" text-anchor="middle" fill="#64748b" font-size="9">Хранить, но валидировать</text>
+   189→  <rect x="490" y="165" width="190" height="65" rx="14" fill="#10b981" opacity="0.08" stroke="#10b981" stroke-width="1.5" filter="url(#sh)"/>
+   190→  <rect x="500" y="175" width="70" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+   191→  <text x="535" y="189" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">max-age=N</text>
+   192→  <text x="615" y="189" text-anchor="middle" fill="#10b981" font-size="10">Кэшировать на N сек</text>
+   193→  <text x="585" y="215" text-anchor="middle" fill="#64748b" font-size="9">Хранить N секунд</text>
+   194→  <rect x="220" y="265" width="260" height="55" rx="14" fill="#64748b" opacity="0.08" stroke="#64748b" stroke-width="1" filter="url(#sh)"/>
+   195→  <text x="350" y="288" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">Нет заголовка?</text>
+   196→  <text x="350" y="306" text-anchor="middle" fill="#64748b" font-size="9">Эвристическое кэширование</text>
+   197→</svg>`,
+   198→        },
+   199→        practicalExamples: [
+   200→          {
+   201→            title: 'Сравнение правильных и неправильных заголовков',
+   202→            description: 'Разница между безопасными и уязвимыми заголовками Cache-Control',
+   203→            code: `# ❌ УЯЗВИМО: Нет Cache-Control для динамического контента
+   204→HTTP/1.1 200 OK
+   205→Content-Type: text/html
+   206→# Кэш может кэшировать по эвристике!
+   207→
+   208→# ✅ БЕЗОПАСНО: Правильные заголовки для профиля
+   209→HTTP/1.1 200 OK
+   210→Content-Type: text/html
+   211→Cache-Control: no-store, private
+   212→
+   213→# ⚠️ ЧАСТИЧНО: Кэширует, но проверяет
+   214→HTTP/1.1 200 OK
+   215→Content-Type: text/html
+   216→Cache-Control: no-cache, private
+   217→Vary: Cookie`,
+   218→            language: 'http',
+   219→          },
+   220→        ],
+   221→        sandboxes: [
+   222→          { type: 'header-inspector', title: 'Инспектор заголовков кэша', description: 'Введите HTTP-ответ и увидите, как кэш его интерпретирует. Проверьте, будет ли контент кэширован.' },
+   223→        ],
+   224→        commonMistakes: [
+   225→          { mistake: 'Путать no-cache и no-store', explanation: 'no-cache разрешает кэширование, но требует проверки. no-store полностью запрещает хранение.', correctApproach: 'Для персональных данных всегда используйте no-store, а не no-cache.' },
+   226→        ],
+   227→        furtherReading: [
+   228→          { topic: 'Cache Keys', slug: 'what-are-cache-keys', categorySlug: 'cache-keys' },
+   229→          { topic: 'Cache Rules', slug: 'static-extension-rules', categorySlug: 'cache-rules' },
+   230→        ],
+   231→      },
+   232→    ],
+   233→  },
+   234→  {
+   235→    slug: 'cache-keys',
+   236→    title: 'Cache Keys',
+   237→    description: 'Как формируются ключи кэша, какие компоненты запроса учитываются и как вариативность ключей влияет на безопасность',
+   238→    iconName: 'Key',
+   239→    subtopics: [
+   240→      {
+   241→        slug: 'what-are-cache-keys',
+   242→        title: 'Что такое Cache Keys',
+   243→        categorySlug: 'cache-keys',
+   244→        introduction: {
+   245→          what: 'Cache Key (ключ кэша) — это уникальный идентификатор, по которому кэш находит сохранённый ответ. Представьте библиотеку: каждая книга имеет шифр, по которому её находят. Cache Key — это такой шифр для кэшированного ответа. Обычно ключ формируется из метода запроса (GET), хоста (example.com) и пути (/api/profile).',
+   246→          why: 'Ключи критически важны, потому что они определяют, будет ли кэш считать два запроса одинаковыми. Если два разных пользователя запрашивают /profile, и кэш использует один и тот же ключ — второй пользователь получит ответ первого. Это прямая утечка данных.',
+   247→          where: 'Cache Keys используются в каждом кэше: браузерном, CDN, reverse proxy. Каждый кэш формирует ключ по-своему, что создаёт несоответствия и уязвимости.',
+   248→          problem: 'Главная проблема: кэш часто не включает в ключ важные компоненты запроса. Cookie, заголовки авторизации, query-параметры — всё это может НЕ входить в ключ. В результате кэш может отдать персональный контент одного пользователя другому.',
+   249→        },
+   250→        theory: {
+   251→          terms: [
+   252→            { term: 'Cache Key', definition: 'Уникальный идентификатор кэшированного ответа. Формируется из частей HTTP-запроса. Два запроса с одинаковым ключом получают один и тот же кэшированный ответ.' },
+   253→            { term: 'Key Variance', definition: 'Вариативность ключа — разница между ключами для похожих запросов. Если Vary: Cookie, то запросы с разными Cookie получат разные ключи.' },
+   254→            { term: 'Unkeyed Input', definition: 'Часть запроса, которая НЕ входит в ключ кэша. Заголовки, не указанные в Vary, часто unkeyed — кэш игнорирует их при формировании ключа.' },
+   255→          ],
+   256→          principles: `## Принципы формирования ключей
+   257→
+   258→Стандартный Cache Key состоит из:
+   259→1. **Метод запроса** (GET, POST) — обычно кэшируются только GET
+   260→2. **Хост** (example.com) — разные домены = разные ключи
+   261→3. **Путь** (/api/users) — основной компонент ключа
+   262→4. **Query string** (?page=1) — часто входит в ключ, но не всегда
+   263→
+   264→Что обычно **НЕ** входит в ключ:
+   265→- Cookie (если нет Vary: Cookie)
+   266→- Заголовки авторизации
+   267→- Тело запроса (для GET его нет)
+   268→- Фрагмент URL (#section)
+   269→
+   270→Это значит: /profile и /profile;hack.css могут иметь один и тот же ключ, если кэш игнорирует точку с запятой. Это основа WCD.`,
+   271→          architecture: `## Архитектура ключей в разных кэшах
+   272→
+   273→Разные CDN формируют ключи по-разному:
+   274→
+   275→**Cloudflare:** ключ = хост + путь (без query string по умолчанию). Можно настроить через Cache Keys.
+   276→**Akamai:** ключ включает хост, путь, query string. Настраивается через Vary.
+   277→**Fastify:** полный контроль через плагины.
+   278→
+   279→Vary-заголовок расширяет ключ. Vary: Cookie добавляет значение Cookie к ключу. Vary: Accept-Encoding создаёт разные записи для gzip/br/none.`,
+   280→          connections: `Cache Keys напрямую связаны с Cache Rules и WCD Attacks. Понимание ключей необходимо для конструирования атак: если мы знаем, что кэш игнорирует часть URL, мы можем использовать это для обмана.`,
+   281→        },
+   282→        diagram: {
+   283→          type: 'architecture',
+   284→          title: 'Формирование Cache Key',
+   285→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 280" fill="none">
+   286→  <defs>
+   287→    <filter id="ks"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+   288→  </defs>
+   289→  <rect x="20" y="20" width="260" height="240" rx="16" fill="#3b82f6" opacity="0.05" stroke="#3b82f6" stroke-width="1" stroke-dasharray="6,3"/>
+   290→  <text x="150" y="48" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">HTTP Запрос</text>
+   291→  <rect x="40" y="65" width="220" height="32" rx="10" fill="#10b981" opacity="0.12" stroke="#10b981" stroke-width="1" filter="url(#ks)"/>
+   292→  <rect x="48" y="72" width="8" height="18" rx="4" fill="#10b981"/>
+   293→  <text x="150" y="86" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">GET /profile HTTP/1.1</text>
+   294→  <rect x="40" y="105" width="220" height="32" rx="10" fill="#10b981" opacity="0.12" stroke="#10b981" stroke-width="1" filter="url(#ks)"/>
+   295→  <rect x="48" y="112" width="8" height="18" rx="4" fill="#10b981"/>
+   296→  <text x="150" y="126" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">Host: example.com</text>
+   297→  <rect x="40" y="150" width="220" height="32" rx="10" fill="#ef4444" opacity="0.12" stroke="#ef4444" stroke-width="1" filter="url(#ks)"/>
+   298→  <rect x="48" y="157" width="8" height="18" rx="4" fill="#ef4444"/>
+   299→  <text x="150" y="171" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="600">Cookie: session=abc</text>
+   300→  <rect x="40" y="195" width="220" height="32" rx="10" fill="#ef4444" opacity="0.12" stroke="#ef4444" stroke-width="1" filter="url(#ks)"/>
+   301→  <rect x="48" y="202" width="8" height="18" rx="4" fill="#ef4444"/>
+   302→  <text x="150" y="216" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="600">Accept: text/html</text>
+   303→  <rect x="350" y="50" width="370" height="170" rx="16" fill="#f59e0b" opacity="0.06" stroke="#f59e0b" stroke-width="1.5" filter="url(#ks)"/>
+   304→  <text x="535" y="80" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="bold">Cache Key</text>
+   305→  <rect x="380" y="100" width="310" height="35" rx="10" fill="#1e293b" opacity="0.9"/>
+   306→  <text x="535" y="123" text-anchor="middle" fill="#f59e0b" font-size="12" font-family="monospace" font-weight="bold">GET|example.com|/profile</text>
+   307→  <rect x="380" y="155" width="150" height="28" rx="10" fill="#10b981" opacity="0.15"/>
+   308→  <text x="455" y="174" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">Метод + Хост + Путь</text>
+   309→  <rect x="540" y="155" width="150" height="28" rx="10" fill="#ef4444" opacity="0.15"/>
+   310→  <text x="615" y="174" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">Cookie НЕ входит!</text>
+   311→</svg>`,
+   312→        },
+   313→        practicalExamples: [
+   314→          {
+   315→            title: 'Два запроса с одинаковым ключом',
+   316→            description: 'Пользователь А и Б запрашивают /profile — кэш использует один ключ',
+   317→            code: `# Запрос пользователя А (авторизован)
+   318→GET /profile HTTP/1.1
+   319→Host: example.com
+   320→Cookie: session=user_a_token
+   321→
+   322→# Кэш формирует ключ: GET|example.com|/profile
+   323→# Сохраняет ответ с данными пользователя А
+   324→
+   325→# Запрос пользователя Б (без авторизации)
+   326→GET /profile HTTP/1.1
+   327→Host: example.com
+   328→
+   329→# Кэш находит тот же ключ: GET|example.com|/profile
+   330→# Возвращает данные пользователя А! УТЕЧКА!`,
+   331→            language: 'http',
+   332→          },
+   333→        ],
+   334→        sandboxes: [
+   335→          { type: 'cache-key-lab', title: 'Лаборатория Cache Keys', description: 'Сконструируйте Cache Key из частей запроса. Увидьте, какие компоненты входят в ключ, а какие игнорируются.' },
+   336→        ],
+   337→        commonMistakes: [
+   338→          { mistake: 'Думать, что Cookie всегда входит в Cache Key', explanation: 'По умолчанию Cookie НЕ входит в ключ. Только Vary: Cookie добавляет его.', correctApproach: 'Сервер должен отправлять Vary: Cookie для персонализированного контента.' },
+   339→        ],
+   340→        furtherReading: [
+   341→          { topic: 'Cache Rules', slug: 'static-extension-rules', categorySlug: 'cache-rules' },
+   342→          { topic: 'WCD Attacks', slug: 'constructing-wcd-attack', categorySlug: 'wcd-attacks' },
+   343→        ],
+   344→      },
+   345→    ],
+   346→  },
+   347→  {
+   348→    slug: 'cache-rules',
+   349→    title: 'Cache Rules',
+   350→    description: 'Правила кэширования: как кэш решает, что кэшировать, и какие расширения/директории считаются статическими',
+   351→    iconName: 'Shield',
+   352→    subtopics: [
+   353→      {
+   354→        slug: 'static-extension-rules',
+   355→        title: 'Static Extension Rules',
+   356→        categorySlug: 'cache-rules',
+   357→        introduction: {
+   358→          what: 'Static Extension Rule — это правило кэширования, которое определяет: если URL заканчивается расширением статического файла (.css, .js, .png, .jpg), кэшировать ответ автоматически. Кэш видит /style.css и думает: "Это статический файл, кэширую!" — не спрашивая сервер.',
+   359→          why: 'Это правило нужно для производительности: статические файлы меняются редко, и кэшировать их безопасно. Проблема в том, что кэш судит только по расширению, не проверяя реальное содержимое. URL /profile.css может возвращать динамический HTML, но кэш увидит .css и кэширует.',
+   360→          where: 'Static Extension Rules используются во всех CDN и reverse proxy. Cloudflare кэширует .css, .js, .png и другие расширения автоматически. Nginx и Varnish имеют аналогичные настройки.',
+   361→          problem: 'Злоумышленник может добавить .css к URL динамической страницы: /profile.css. Сервер может проигнорировать .css и вернуть профиль, а кэш увидит .css и кэширует ответ. Другой пользователь получит чужой профиль.',
+   362→        },
+   363→        theory: {
+   364→          terms: [
+   365→            { term: 'Static Extension', definition: 'Расширение файла, которое кэш считает статическим. Обычно: .css, .js, .png, .jpg, .gif, .ico, .svg, .woff, .woff2, .ttf, .eot.' },
+   366→            { term: 'Cache Rule', definition: 'Правило, определяющее, должен ли ответ кэшироваться. Может основываться на расширении, директории, заголовках или их комбинации.' },
+   367→            { term: 'Dynamic Content', definition: 'Динамический контент — содержимое, которое генерируется для каждого пользователя персонально. Профиль, корзина, настройки — примеры.' },
+   368→          ],
+   369→          principles: `## Принципы Static Extension Rules
+   370→
+   371→Кэш проверяет URL по списку расширений. Если URL заканчивается на .css — кэшировать. Если на .php — не кэшировать. Это простое и быстрое правило, но оно не учитывает реальное содержимое ответа.
+   372→
+   373→**Проблема:** Сервер может игнорировать расширение в URL. /profile.css может вернуть динамический HTML-контент профиля, потому что сервер маршрутизирует по /profile, а .css считает "мусором".
+   374→
+   375→**Классический сценарий WCD:**
+   376→1. Атакующий посещает /profile.css (свой профиль)
+   377→2. Кэш видит .css → кэширует
+   378→3. Жертва посещает /profile.css
+   379→4. Кэш возвращает профиль атакующего из кэша
+   380→
+   381→Для успеха нужно: кэш должен кэшировать по расширению, а сервер должен игнорировать расширение.`,
+   382→          architecture: `## Порядок проверки правил
+   383→
+   384→Кэш проверяет правила в порядке приоритета:
+   385→1. Cache-Control заголовки (no-store побеждает всё)
+   386→2. Static Extension Rules (если нет запрета)
+   387→3. Static Directory Rules (по директории)
+   388→4. Эвристические правила (если нет ничего)
+   389→
+   390→Если Cache-Control: no-store, расширение не имеет значения. Но если сервер не отправляет этот заголовок — расширение побеждает.`,
+   391→          connections: `Static Extension Rules — основа большинства WCD-атак. Они связаны с Path Mapping (как сервер мапит URL) и Delimiter Discrepancies (как добавить расширение к URL).`,
+   392→        },
+   393→        diagram: {
+   394→          type: 'flowchart',
+   395→          title: 'Проверка Static Extension Rule',
+   396→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none">
+   397→  <defs><filter id="sef"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+   398→  <rect x="20" y="70" width="200" height="80" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#sef)"/>
+   399→  <text x="120" y="100" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">URL: /profile.css</text>
+   400→  <text x="120" y="120" text-anchor="middle" fill="#64748b" font-size="10">Проверка расширения</text>
+   401→  <rect x="290" y="20" width="180" height="80" rx="16" fill="#10b981" opacity="0.08" stroke="#10b981" stroke-width="1.5" filter="url(#sef)"/>
+   402→  <rect x="310" y="32" width="50" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+   403→  <text x="335" y="46" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">.css</text>
+   404→  <text x="380" y="46" text-anchor="middle" fill="#10b981" font-size="10">В списке!</text>
+   405→  <text x="380" y="70" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">КЭШИРОВАТЬ!</text>
+   406→  <text x="380" y="88" text-anchor="middle" fill="#64748b" font-size="9">Статический файл</text>
+   407→  <rect x="290" y="140" width="180" height="80" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#sef)"/>
+   408→  <rect x="310" y="152" width="50" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   409→  <text x="335" y="166" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">.php</text>
+   410→  <text x="380" y="166" text-anchor="middle" fill="#ef4444" font-size="10">В списке!</text>
+   411→  <text x="380" y="190" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">НЕ кэшировать</text>
+   412→  <text x="380" y="208" text-anchor="middle" fill="#64748b" font-size="9">Динамический файл</text>
+   413→  <rect x="530" y="65" width="150" height="100" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#sef)"/>
+   414→  <text x="605" y="95" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">Кэш сохраняет</text>
+   415→  <text x="605" y="115" text-anchor="middle" fill="#f59e0b" font-size="10">профиль как</text>
+   416→  <text x="605" y="135" text-anchor="middle" fill="#f59e0b" font-size="10">статический!</text>
+   417→  <rect x="555" y="145" width="100" height="14" rx="7" fill="#ef4444" opacity="0.2"/>
+   418→  <text x="605" y="155" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="bold">УЯЗВИМОСТЬ</text>
+   419→</svg>`,
+   420→        },
+   421→        practicalExamples: [
+   422→          {
+   423→            title: 'WCD через Static Extension Rule',
+   424→            description: 'Атакующий добавляет .css к URL профиля',
+   425→            code: `# Шаг 1: Атакующий запрашивает свой профиль с .css
+   426→GET /my-profile.css HTTP/1.1
+   427→Host: vulnerable-site.com
+   428→Cookie: session=attacker_token
+   429→
+   430→# Сервер игнорирует .css, возвращает профиль
+   431→HTTP/1.1 200 OK
+   432→Content-Type: text/html  # Не CSS!
+   433→# Нет Cache-Control!
+   434→
+   435→# Кэш видит .css → кэширует ответ
+   436→# X-Cache: MISS
+   437→
+   438→# Шаг 2: Жертва запрашивает тот же URL
+   439→GET /my-profile.css HTTP/1.1
+   440→Host: vulnerable-site.com
+   441→
+   442→# Кэш возвращает профиль атакующего!
+   443→HTTP/1.1 200 OK
+   444→X-Cache: HIT
+   445→# Содержимое: профиль атакующего!`,
+   446→            language: 'http',
+   447→          },
+   448→        ],
+   449→        sandboxes: [
+   450→          { type: 'static-rule-lab', title: 'Лаборатория Static Extension Rules', description: 'Добавляйте расширения к URL и наблюдайте, как кэш решает, кэшировать ли ответ. Проверьте, какие расширения статические.' },
+   451→        ],
+   452→        commonMistakes: [
+   453→          { mistake: 'Думать, что Content-Type предотвращает кэширование', explanation: 'Кэш часто игнорирует Content-Type при проверке расширения. text/html с расширением .css всё равно кэшируется.', correctApproach: 'Расширение URL важнее Content-Type для многих кэшей.' },
+   454→        ],
+   455→        furtherReading: [
+   456→          { topic: 'WCD Attacks', slug: 'constructing-wcd-attack', categorySlug: 'wcd-attacks' },
+   457→          { topic: 'File Name Rules', slug: 'file-name-rules-overview', categorySlug: 'file-name-rules' },
+   458→        ],
+   459→      },
+   460→      {
+   461→        slug: 'static-directory-rules',
+   462→        title: 'Static Directory Rules',
+   463→        categorySlug: 'cache-rules',
+   464→        introduction: {
+   465→          what: 'Static Directory Rule — правило кэширования по директории. Кэш автоматически кэширует все запросы к определённым директориям, например /static/, /assets/, /images/. Если URL начинается с /static/, кэш считает контент статическим.',
+   466→          why: 'Это правило удобно для разработчиков: они складывают статические файлы в /static/ и не настраивают заголовки для каждого файла. Проблема в том, что атакующий может использовать путь вроде /static/../../../profile, и кэш увидит /static/ и кэширует.',
+   467→          where: 'Используется в Nginx (location /static/), Cloudflare (Page Rules), Varnish (vcl). Многие фреймворки по умолчанию обслуживают /static/ как кэшируемый.',
+   468→          problem: 'Path traversal через /static/../../profile может обмануть кэш. Кэш видит /static/ в начале пути и кэширует, а сервер нормализует путь и возвращает /profile.',
+   469→        },
+   470→        theory: {
+   471→          terms: [
+   472→            { term: 'Static Directory', definition: 'Директория, содержимое которой кэш считает статическим. Обычно: /static/, /assets/, /public/, /images/, /css/, /js/.' },
+   473→            { term: 'Path Traversal', definition: 'Техника обхода директорий с помощью ../. Путь /static/../../etc/passwd пытается выйти за пределы /static/.' },
+   474→          ],
+   475→          principles: `## Принципы Static Directory Rules
+   476→
+   477→Кэш проверяет **начало пути** URL. Если путь начинается с /static/, /assets/ или другой статической директории — кэшировать. Это простое правило, уязвимое к path traversal.
+   478→
+   479→Кэш видит: \`/static/../../profile\` → начинается с /static/ → кэшировать!
+   480→Сервер видит: \`/static/../../profile\` → нормализует → \`/profile\` → динамический контент!
+   481→
+   482→Разница в обработке path traversal между кэшем и сервером — это и есть уязвимость.`,
+   483→          architecture: `## Иерархия правил
+   484→
+   485→1. Cache-Control заголовки (высший приоритет)
+   486→2. Static Extension Rules
+   487→3. Static Directory Rules
+   488→4. Эвристика
+   489→
+   490→Директория имеет более низкий приоритет, чем расширение. Но если нет расширения, правило директории вступает в силу.`,
+   491→          connections: `Связано с Path Mapping Discrepancies (как сервер мапит путь) и Normalization Discrepancies (как сервер нормализует ../).`,
+   492→        },
+   493→        diagram: {
+   494→          type: 'flowchart',
+   495→          title: 'Static Directory Rule vs Path Traversal',
+   496→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 220" fill="none">
+   497→  <defs><filter id="sdf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+   498→  <rect x="20" y="40" width="280" height="120" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#sdf)"/>
+   499→  <text x="160" y="70" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">URL: /static/../../profile</text>
+   500→  <text x="160" y="95" text-anchor="middle" fill="#64748b" font-size="10">Один URL — две интерпретации</text>
+   501→  <rect x="380" y="10" width="290" height="85" rx="16" fill="#10b981" opacity="0.08" stroke="#10b981" stroke-width="1.5" filter="url(#sdf)"/>
+   502→  <rect x="395" y="22" width="80" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+   503→  <text x="435" y="36" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">КЭШ</text>
+   504→  <text x="525" y="36" text-anchor="middle" fill="#10b981" font-size="10">/static/*</text>
+   505→  <text x="525" y="56" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">Начинается с /static/</text>
+   506→  <text x="525" y="76" text-anchor="middle" fill="#10b981" font-size="10" font-weight="bold">КЭШИРОВАТЬ!</text>
+   507→  <rect x="380" y="115" width="290" height="85" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#sdf)"/>
+   508→  <rect x="395" y="127" width="80" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   509→  <text x="435" y="141" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">СЕРВЕР</text>
+   510→  <text x="525" y="141" text-anchor="middle" fill="#ef4444" font-size="10">Нормализация</text>
+   511→  <text x="525" y="161" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="600">/static/../../profile</text>
+   512→  <text x="525" y="181" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">Динамический профиль!</text>
+   513→</svg>`,
+   514→        },
+   515→        practicalExamples: [
+   516→          {
+   517→            title: 'WCD через Static Directory Rule',
+   518→            description: 'Path traversal через статическую директорию',
+   519→            code: `# Атакующий использует /static/ для обхода правила
+   520→GET /static/../../api/user/profile HTTP/1.1
+   521→Host: vulnerable-site.com
+   522→Cookie: session=attacker
+   523→
+   524→# Кэш: путь начинается с /static/ → кэшировать
+   525→# Сервер: нормализует /static/../../ → /
+   526→# Сервер возвращает: /api/user/profile (динамический!)
+   527→
+   528→# Жертва запрашивает тот же URL
+   529→GET /static/../../api/user/profile HTTP/1.1
+   530→Host: vulnerable-site.com
+   531→
+   532→# Кэш возвращает профиль атакующего!`,
+   533→            language: 'http',
+   534→          },
+   535→        ],
+   536→        sandboxes: [
+   537→          { type: 'path-mapping-lab', title: 'Лаборатория Path Mapping', description: 'Исследуйте, как кэш и сервер по-разному обрабатывают /static/../../. Введите путь и увидьте две интерпретации.' },
+   538→        ],
+   539→        commonMistakes: [
+   540→          { mistake: 'Думать, что кэш нормализует пути так же, как сервер', explanation: 'Кэш часто НЕ нормализует пути, а использует их как есть для формирования ключа.', correctApproach: 'Всегда проверяйте, как кэш обрабатывает ../, // и другие специальные последовательности.' },
+   541→        ],
+   542→        furtherReading: [
+   543→          { topic: 'Path Mapping', slug: 'path-mapping-overview', categorySlug: 'path-mapping' },
+   544→          { topic: 'Normalization', slug: 'normalization-overview', categorySlug: 'normalization' },
+   545→        ],
+   546→      },
+   547→    ],
+   548→  },
+   549→  {
+   550→    slug: 'wcd-attacks',
+   551→    title: 'Web Cache Deception Attacks',
+   552→    description: 'Конструирование атак Web Cache Deception: от базового сценария до продвинутых техник',
+   553→    iconName: 'Swords',
+   554→    subtopics: [
+   555→      {
+   556→        slug: 'constructing-wcd-attack',
+   557→        title: 'Конструирование WCD-атаки',
+   558→        categorySlug: 'wcd-attacks',
+   559→        introduction: {
+   560→          what: 'Web Cache Deception (WCD) — это атака, при которой злоумышленник обманывает кэш, заставляя его сохранить конфиденциальный ответ сервера и отдать его другому пользователю. В отличие от Cache Poisoning, где атакующий "отравляет" кэш вредоносным контентом, в WCD кэш сохраняет легитимный, но приватный контент и отдаёт его не тому человеку.',
+   561→          why: 'WCD опасен тем, что не требует взлома сервера. Атакующий использует разницу между тем, как кэш и сервер интерпретируют URL. Если кэш считает URL статическим (и кэширует), а сервер обрабатывает его как динамический (и возвращает приватные данные) — происходит утечка.',
+   562→          where: 'WCD-атаки применяются против сайтов с CDN (Cloudflare, Akamai), reverse proxy (Nginx, Varnish) и даже браузерного кэша. Уязвимы многие крупные сайты — Facebook, PayPal, Reddit и другие уже имели такие уязвимости.',
+   563→          problem: 'Главная проблема: атакующий не взламывает ничего. Он просто конструирует URL, который по-разному интерпретируется кэшем и сервером. Это делает атаку незаметной и труднообнаружимой.',
+   564→        },
+   565→        theory: {
+   566→          terms: [
+   567→            { term: 'Cache Deception', definition: 'Обман кэша: кэш сохраняет приватный контент, думая, что он публичный. Другие пользователи получают этот контент из кэша.' },
+   568→            { term: 'Cache Poisoning', definition: 'Отравление кэша: атакующий внедряет вредоносный контент в кэш, который затем отдаётся другим пользователям. Отличается от Deception тем, что атакующий контролирует контент.' },
+   569→            { term: 'Discrepancy', definition: 'Несоответствие — разница в обработке URL между кэшем и сервером. Это ключевое условие для WCD.' },
+   570→          ],
+   571→          principles: `## Принципы конструирования WCD-атаки
+   572→
+   573→Условия для успешной WCD-атаки:
+   574→1. **Кэш должен кэшировать ответ** — URL должен соответствовать правилам кэширования (расширение, директория, отсутствие no-store)
+   575→2. **Сервер должен вернуть приватный контент** — сервер должен обработать URL и вернуть динамический, персональный контент
+   576→3. **Кэш и сервер должны по-разному интерпретировать URL** — это и есть discrepancy
+   577→
+   578→Три шага атаки:
+   579→1. **Исследование** — найти страницы с приватными данными (профиль, API, настройки)
+   580→2. **Конструирование URL** — добавить к URL расширение, разделитель или путь, который обманет кэш
+   581→3. **Проверка** — отправить crafted URL жертве, проверить, получает ли она чужие данные
+   582→
+   583→Ключевые техники:
+   584→- Добавить .css/.js к динамическому URL
+   585→- Использовать разделители (; %23 %3f)
+   586→- Использовать path traversal (/static/../../profile)
+   587→- Использовать нормализацию (/profile%2f..%2fcss)`,
+   588→          architecture: `## Сравнение Cache Deception vs Cache Poisoning
+   589→
+   590→**Cache Deception** — кэш сохраняет легитимный, но приватный контент. Цель: украсть данные. Ключ: URL с discrepancy. Обнаружение: трудно, так как трафик легитимный.
+   591→
+   592→**Cache Poisoning** — кэш сохраняет вредоносный, контролируемый атакующим контент. Цель: внедрить вредоносный код. Ключ: URL с unkeyed параметрами. Обнаружение: легче, так как контент аномальный.
+   593→
+   594→Главное отличие: в Deception атакующий получает данные жертвы, а в Poisoning жертва получает вредоносный контент атакующего.`,
+   595→          connections: `WCD-атаки опираются на все предыдущие темы: понимание кэша, ключей, правил, разделителей, маппинга путей и нормализации. Каждая техника атаки использует конкретный тип discrepancy.`,
+   596→        },
+   597→        diagram: {
+   598→          type: 'pipeline',
+   599→          title: 'Сценарий WCD-атаки',
+   600→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" fill="none">
+   601→  <defs><filter id="wcf"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.08"/></filter></defs>
+   602→  <rect x="10" y="30" width="150" height="90" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#wcf)"/>
+   603→  <rect x="25" y="42" width="30" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   604→  <text x="40" y="56" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">1</text>
+   605→  <text x="85" y="56" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">Атакующий</text>
+   606→  <text x="85" y="80" text-anchor="middle" fill="#64748b" font-size="10">/profile.css</text>
+   607→  <text x="85" y="98" text-anchor="middle" fill="#64748b" font-size="9">Свои данные</text>
+   608→  <rect x="220" y="30" width="150" height="90" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#wcf)"/>
+   609→  <rect x="235" y="42" width="30" height="20" rx="10" fill="#f59e0b" opacity="0.2"/>
+   610→  <text x="250" y="56" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold">2</text>
+   611→  <text x="295" y="56" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">Кэш: .css</text>
+   612→  <text x="295" y="80" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold">КЭШИРОВАТЬ!</text>
+   613→  <text x="295" y="98" text-anchor="middle" fill="#64748b" font-size="9">Расширение .css</text>
+   614→  <rect x="430" y="30" width="150" height="90" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#wcf)"/>
+   615→  <rect x="445" y="42" width="30" height="20" rx="10" fill="#3b82f6" opacity="0.2"/>
+   616→  <text x="460" y="56" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">3</text>
+   617→  <text x="505" y="56" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="bold">Сервер</text>
+   618→  <text x="505" y="80" text-anchor="middle" fill="#3b82f6" font-size="10">Игнорирует .css</text>
+   619→  <text x="505" y="98" text-anchor="middle" fill="#3b82f6" font-size="9">/profile</text>
+   620→  <rect x="640" y="30" width="150" height="90" rx="16" fill="#10b981" opacity="0.08" stroke="#10b981" stroke-width="1.5" filter="url(#wcf)"/>
+   621→  <rect x="655" y="42" width="30" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+   622→  <text x="670" y="56" text-anchor="middle" fill="#10b981" font-size="10" font-weight="bold">4</text>
+   623→  <text x="715" y="56" text-anchor="middle" fill="#10b981" font-size="11" font-weight="bold">Кэш сохраняет</text>
+   624→  <text x="715" y="80" text-anchor="middle" fill="#10b981" font-size="10">Профиль как CSS</text>
+   625→  <text x="715" y="98" text-anchor="middle" fill="#64748b" font-size="9">В кэше!</text>
+   626→  <rect x="280" y="170" width="240" height="90" rx="16" fill="#ef4444" opacity="0.1" stroke="#ef4444" stroke-width="2" filter="url(#wcf)"/>
+   627→  <rect x="295" y="182" width="30" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   628→  <text x="310" y="196" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">5</text>
+   629→  <text x="400" y="196" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">Жертва</text>
+   630→  <text x="400" y="220" text-anchor="middle" fill="#ef4444" font-size="11">/profile.css</text>
+   631→  <text x="400" y="242" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">Профиль атакующего!</text>
+   632→</svg>`,
+   633→        },
+   634→        practicalExamples: [
+   635→          {
+   636→            title: 'Полный сценарий WCD-атаки',
+   637→            description: 'Пошаговая демонстрация атаки на уязвимый сайт',
+   638→            code: `# Шаг 1: Найти страницу с приватными данными
+   639→GET /api/user/settings HTTP/1.1
+   640→Host: vulnerable.com
+   641→Cookie: session=attacker
+   642→# Ответ: {"email":"attacker@evil.com","api_key":"sk-xxx"}
+   643→
+   644→# Шаг 2: Добавить расширение .css
+   645→GET /api/user/settings.css HTTP/1.1
+   646→Host: vulnerable.com
+   647→Cookie: session=attacker
+   648→# Сервер игнорирует .css → возвращает JSON
+   649→# Кэш видит .css → кэширует!
+   650→# X-Cache: MISS
+   651→
+   652→# Шаг 3: Отправить жертве
+   653→GET /api/user/settings.css HTTP/1.1
+   654→Host: vulnerable.com
+   655→Cookie: session=victim
+   656→# Кэш: HIT! Возвращает данные атакующего!
+   657→# Жертва видит: {"email":"attacker@evil.com",...}`,
+   658→            language: 'http',
+   659→          },
+   660→        ],
+   661→        sandboxes: [
+   662→          { type: 'attack-builder', title: 'Конструктор WCD-атаки', description: 'Пошагово сконструируйте WCD-атаку: выберите цель, добавьте расширение/разделитель, проверьте результат.' },
+   663→        ],
+   664→        commonMistakes: [
+   665→          { mistake: 'Путать Cache Deception и Cache Poisoning', explanation: 'Deception — кража чужих данных через кэш. Poisoning — внедрение вредоносного контента в кэш.', correctApproach: 'В Deception атакующий получает данные жертвы. В Poisoning жертва получает вредоносный контент атакующего.' },
+   666→        ],
+   667→        furtherReading: [
+   668→          { topic: 'Delimiter Discrepancies', slug: 'delimiter-overview', categorySlug: 'delimiter-discrepancies' },
+   669→          { topic: 'Path Mapping', slug: 'path-mapping-overview', categorySlug: 'path-mapping' },
+   670→        ],
+   671→      },
+   672→    ],
+   673→  },
+   674→  {
+   675→    slug: 'delimiter-discrepancies',
+   676→    title: 'Delimiter Discrepancies',
+   677→    description: 'Несоответствия в обработке разделителей URL между кэшем и сервером',
+   678→    iconName: 'Scissors',
+   679→    subtopics: [
+   680→      {
+   681→        slug: 'delimiter-overview',
+   682→        title: 'Разделители в URL и их обработка',
+   683→        categorySlug: 'delimiter-discrepancies',
+   684→        introduction: {
+   685→          what: 'Разделители URL — это специальные символы, которые разделяют части URL: ? начинает query string, & разделяет параметры, # отмечает фрагмент, ; может быть параметром пути. Кэш и сервер часто обрабатывают эти разделители по-разному, что создаёт уязвимости.',
+   686→          why: 'Разница в обработке разделителей — один из самых мощных векторов WCD. Если кэш обрезает URL после ;, а сервер обрабатывает весь путь, атакующий может добавить ;.css к динамическому URL и обмануть кэш.',
+   687→          where: 'Delimiter Discrepancies встречаются повсеместно: Cloudflare, Nginx, Varnish, Akamai — все они по-разному обрабатывают ;, ?, # и кодированные разделители.',
+   688→          problem: 'Главная проблема: нет единого стандарта обработки разделителей. RFC 3986 определяет синтаксис URL, но серверы и кэши интерпретируют его по-разному. Это создаёт несоответствия, которые эксплуатируются в WCD.',
+   689→        },
+   690→        theory: {
+   691→          terms: [
+   692→            { term: '; (semicolon)', definition: 'В URL точка с запятой может быть параметром пути (path parameter). /profile;v=1.css — сервер может игнорировать ;v=1.css, а кэш видеть .css.' },
+   693→            { term: 'Delimiter Decoding', definition: 'Декодирование разделителей: %3B = ;, %3F = ?, %23 = #. Кэш может декодировать, а сервер — нет, или наоборот.' },
+   694→            { term: 'Path Parameter', definition: 'Параметр пути — часть URL после ;. RFC 3986 разрешает ;param в пути. Некоторые серверы игнорируют его, другие обрабатывают.' },
+   695→          ],
+   696→          principles: `## Принципы Delimiter Discrepancies
+   697→
+   698→Ключевой принцип: **кэш и сервер могут по-разному определять, где заканчивается путь и начинаются параметры**.
+   699→
+   700→Примеры несоответствий:
+   701→- **Кэш обрезает после ;** → /profile;css воспринимается как /profile
+   702→- **Сервер игнорирует ;css** → /profile;css обрабатывается как /profile
+   703→- **Кэш видит .css после ;** → /profile;.css → расширение .css → кэшировать!
+   704→- **Сервер игнорирует ;.css** → возвращает динамический контент
+   705→
+   706→Delimiter Decoding добавляет ещё один уровень:
+   707→- /profile%3B.css — кэш может декодировать %3B в ; и увидеть .css
+   708→- Сервер может не декодировать и обработать /profile%3B.css как есть`,
+   709→          architecture: `## Типы разделителей и их обработка
+   710→
+   711→**;param** — Кэш обрезает, сервер игнорирует. Риск: **высокий** — самый опасный разделитель, часто эксплуатируемый в WCD.
+   712→
+   713→**?query** — Кэш обрезает, сервер обрабатывает. Риск: **средний** — может сработать, если сервер игнорирует query-параметры.
+   714→
+   715→**#fragment** — Кэш обрезает, браузер не отправляет. Риск: **низкий** — фрагмент не доходит до сервера.
+   716→
+   717→**%3B (;)** — Кэш декодирует, сервер не декодирует. Риск: **высокий** — кодированная точка с запятой обманывает сервер.
+   718→
+   719→**%3F (?)** — Кэш декодирует, сервер не декодирует. Риск: **средний** — кодированный вопросительный знак может обойти фильтры.`,
+   720→          connections: `Delimiter Discrepancies — ключевая техника для WCD-атак. Связана с Cache Rules (расширения после разделителей) и Normalization (декодирование разделителей).`,
+   721→        },
+   722→        diagram: {
+   723→          type: 'comparison',
+   724→          title: 'Обработка разделителей: кэш vs сервер',
+   725→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 220" fill="none">
+   726→  <defs><filter id="ddf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+   727→  <rect x="20" y="60" width="220" height="60" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#ddf)"/>
+   728→  <text x="130" y="85" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">/profile;.css</text>
+   729→  <text x="130" y="105" text-anchor="middle" fill="#64748b" font-size="10">Исходный URL</text>
+   730→  <rect x="300" y="20" width="180" height="75" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#ddf)"/>
+   731→  <rect x="315" y="32" width="70" height="20" rx="10" fill="#f59e0b" opacity="0.2"/>
+   732→  <text x="350" y="46" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold">КЭШ</text>
+   733→  <text x="390" y="46" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold">Видит .css</text>
+   734→  <text x="390" y="70" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">КЭШИРОВАТЬ</text>
+   735→  <text x="390" y="86" text-anchor="middle" fill="#64748b" font-size="9">Расширение .css</text>
+   736→  <rect x="300" y="115" width="180" height="75" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#ddf)"/>
+   737→  <rect x="315" y="127" width="70" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   738→  <text x="350" y="141" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">СЕРВЕР</text>
+   739→  <text x="390" y="141" text-anchor="middle" fill="#ef4444" font-size="10">Игнорирует ;.css</text>
+   740→  <text x="390" y="165" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">/profile</text>
+   741→  <text x="390" y="181" text-anchor="middle" fill="#64748b" font-size="9">Профиль пользователя</text>
+   742→  <rect x="530" y="55" width="150" height="90" rx="16" fill="#ef4444" opacity="0.1" stroke="#ef4444" stroke-width="2" filter="url(#ddf)"/>
+   743→  <text x="605" y="85" text-anchor="middle" fill="#ef4444" font-size="13" font-weight="bold">УТЕЧКА!</text>
+   744→  <text x="605" y="105" text-anchor="middle" fill="#ef4444" font-size="10">Профиль в кэше</text>
+   745→  <text x="605" y="125" text-anchor="middle" fill="#ef4444" font-size="9">Доступен всем</text>
+   746→</svg>`,
+   747→        },
+   748→        practicalExamples: [
+   749→          {
+   750→            title: 'WCD через точку с запятой',
+   751→            description: 'Использование ; для добавления расширения',
+   752→            code: `# Атакующий добавляет ;.css к URL профиля
+   753→GET /api/profile;.css HTTP/1.1
+   754→Host: vulnerable.com
+   755→Cookie: session=attacker
+   756→
+   757→# Кэш: видит расширение .css → кэшировать
+   758→# Сервер: игнорирует ;.css → /api/profile → JSON
+   759→
+   760→# Ответ сервера (кэш сохраняет):
+   761→HTTP/1.1 200 OK
+   762→Content-Type: application/json
+   763→# {"name":"Attacker","email":"a@evil.com"}
+   764→
+   765→# Жертва запрашивает:
+   766→GET /api/profile;.css HTTP/1.1
+   767→Host: vulnerable.com
+   768→
+   769→# Кэш: HIT → данные атакующего!`,
+   770→            language: 'http',
+   771→          },
+   772→        ],
+   773→        sandboxes: [
+   774→          { type: 'delimiter-lab', title: 'Лаборатория разделителей', description: 'Экспериментируйте с разными разделителями (;, ?, #, %3B) и наблюдайте, как кэш и сервер обрабатывают их по-разному.' },
+   775→        ],
+   776→        commonMistakes: [
+   777→          { mistake: 'Думать, что все кэши одинаково обрабатывают разделители', explanation: 'Каждый CDN обрабатывает разделители по-своему. Cloudflare может обрезать после ;, а Nginx — нет.', correctApproach: 'Тестируйте каждый кэш отдельно, не предполагайте одинаковое поведение.' },
+   778→        ],
+   779→        furtherReading: [
+   780→          { topic: 'Normalization', slug: 'normalization-overview', categorySlug: 'normalization' },
+   781→          { topic: 'WCD Attacks', slug: 'constructing-wcd-attack', categorySlug: 'wcd-attacks' },
+   782→        ],
+   783→      },
+   784→    ],
+   785→  },
+   786→  {
+   787→    slug: 'path-mapping',
+   788→    title: 'Path Mapping Discrepancies',
+   789→    description: 'Когда кэш и сервер по-разному мапят URL-путь на файловую систему',
+   790→    iconName: 'Route',
+   791→    subtopics: [
+   792→      {
+   793→        slug: 'path-mapping-overview',
+   794→        title: 'Несоответствия маппинга путей',
+   795→        categorySlug: 'path-mapping',
+   796→        introduction: {
+   797→          what: 'Path Mapping — это процесс преобразования URL-пути в расположение ресурса. Когда приходит запрос /profile, сервер решает, какой файл или обработчик вызвать. Кэш и сервер могут мапить пути по-разному: кэш просто использует путь как ключ, а сервер может нормализовать, перенаправлять или обрабатывать алиасы.',
+   798→          why: 'Разница в маппинге — мощный вектор WCD. Если кэш считает, что /profile.css — это запрос к статическому файлу style.css в директории profile, а сервер обрабатывает /profile.css как /profile (игнорируя расширение) — возникает уязвимость.',
+   799→          where: 'Path Mapping Discrepancies встречаются в Nginx (try_files), Apache (mod_rewrite), фреймворках (Rails, Django) и CDN. Каждый по-своему мапит URL на файлы и обработчики.',
+   800→          problem: 'Нет единого стандарта маппинга. Сервер может использовать fallback-маршрутизацию (если файл не найден, вызвать обработчик), а кэш не знает об этом и считает, что .css = статический файл.',
+   801→        },
+   802→        theory: {
+   803→          terms: [
+   804→            { term: 'Path Mapping', definition: 'Процесс сопоставления URL-пути с ресурсом: файлом, обработчиком, API-эндпоинтом. Каждый сервер мапит по-своему.' },
+   805→            { term: 'Fallback Routing', definition: 'Маршрутизация с откатом: если файл не найден, запрос передаётся обработчику. Nginx try_files — пример.' },
+   806→            { term: 'URL Aliasing', definition: 'Алиас URL: когда несколько URL указывают на один ресурс. /profile и /user/profile могут возвращать одно и то же.' },
+   807→          ],
+   808→          principles: `## Принципы Path Mapping Discrepancies
+   809→
+   810→Кэш мапит путь **буквально**: /profile.css → файл profile.css.
+   811→Сервер мапит путь **гибко**: /profile.css → обработчик /profile (если .css файла нет, fallback).
+   812→
+   813→Это создаёт несоответствие:
+   814→1. Кэш: /profile.css → расширение .css → статический → кэшировать
+   815→2. Сервер: /profile.css → файл не найден → fallback → обработчик /profile → динамический контент
+   816→
+   817→**Fallback Routing** — самая частая причина уязвимости. Nginx try_files проверяет файл, потом каталог, потом отдаёт index.php. Кэш не знает об этом.`,
+   818→          architecture: `## Примеры конфигураций
+   819→
+   820→Nginx fallback:
+   821→\`\`\`
+   822→location / {
+   823→    try_files $uri $uri/ /index.php?$query_string;
+   824→}
+   825→\`\`\`
+   826→
+   827→Это означает: сначала ищи файл, потом директорию, потом перенаправь на index.php. Кэш не знает про try_files и судит только по расширению.`,
+   828→          connections: `Path Mapping связан с Static Directory Rules (маппинг по директории) и Normalization (нормализация путей при маппинге).`,
+   829→        },
+   830→        diagram: {
+   831→          type: 'flowchart',
+   832→          title: 'Path Mapping: кэш vs сервер',
+   833→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none">
+   834→  <defs><filter id="pmf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+   835→  <rect x="230" y="10" width="240" height="45" rx="14" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#pmf)"/>
+   836→  <text x="350" y="38" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">/profile.css</text>
+   837→  <rect x="20" y="85" width="260" height="90" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#pmf)"/>
+   838→  <rect x="35" y="97" width="70" height="20" rx="10" fill="#f59e0b" opacity="0.2"/>
+   839→  <text x="70" y="111" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold">КЭШ</text>
+   840→  <text x="150" y="111" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">.css = статический</text>
+   841→  <text x="150" y="135" text-anchor="middle" fill="#f59e0b" font-size="10">Ключ: /profile.css</text>
+   842→  <rect x="140" y="145" width="90" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+   843→  <text x="185" y="159" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">КЭШИРОВАТЬ</text>
+   844→  <rect x="420" y="85" width="260" height="90" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#pmf)"/>
+   845→  <rect x="435" y="97" width="70" height="20" rx="10" fill="#3b82f6" opacity="0.2"/>
+   846→  <text x="470" y="111" text-anchor="middle" fill="#3b82f6" font-size="9" font-weight="bold">СЕРВЕР</text>
+   847→  <text x="550" y="111" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="bold">try_files</text>
+   848→  <text x="550" y="135" text-anchor="middle" fill="#3b82f6" font-size="10">profile.css? Нет файла</text>
+   849→  <rect x="460" y="145" width="100" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   850→  <text x="510" y="159" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">Fallback /profile</text>
+   851→  <rect x="230" y="200" width="240" height="45" rx="14" fill="#ef4444" opacity="0.1" stroke="#ef4444" stroke-width="2" filter="url(#pmf)"/>
+   852→  <text x="350" y="228" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">Профиль в кэше!</text>
+   853→</svg>`,
+   854→        },
+   855→        practicalExamples: [
+   856→          {
+   857→            title: 'WCD через Nginx try_files fallback',
+   858→            description: 'Сервер с fallback-маршрутизацией уязвим к WCD',
+   859→            code: `# Nginx конфигурация:
+   860→# location / {
+   861→#     try_files $uri $uri/ /index.php?$query_string;
+   862→# }
+   863→
+   864→# Атакующий: /settings.css
+   865→# Nginx: файл settings.css не найден
+   866→# → fallback на index.php → /settings (динамический)
+   867→
+   868→# Кэш: видит .css → кэширует
+   869→# Результат: приватные настройки в кэше!`,
+   870→            language: 'nginx',
+   871→          },
+   872→        ],
+   873→        sandboxes: [
+   874→          { type: 'path-mapping-lab', title: 'Лаборатория Path Mapping', description: 'Настройте правила маппинга сервера и кэша, наблюдайте несоответствия.' },
+   875→        ],
+   876→        commonMistakes: [
+   877→          { mistake: 'Думать, что кэш знает о fallback-маршрутизации сервера', explanation: 'Кэш ничего не знает о конфигурации сервера. Он судит только по URL и заголовкам.', correctApproach: 'Помните: кэш и сервер — независимые системы с разными правилами.' },
+   878→        ],
+   879→        furtherReading: [
+   880→          { topic: 'Static Directory Rules', slug: 'static-directory-rules', categorySlug: 'cache-rules' },
+   881→          { topic: 'Cache Defenses', slug: 'cache-defenses-overview', categorySlug: 'cache-defenses' },
+   882→        ],
+   883→      },
+   884→    ],
+   885→  },
+   886→  {
+   887→    slug: 'normalization',
+   888→    title: 'Normalization Discrepancies',
+   889→    description: 'Несоответствия нормализации URL-путей: кодирование, относительные пути, двойные слеши',
+   890→    iconName: 'Shrink',
+   891→    subtopics: [
+   892→      {
+   893→        slug: 'normalization-overview',
+   894→        title: 'Несоответствия нормализации',
+   895→        categorySlug: 'normalization',
+   896→        introduction: {
+   897→          what: 'Нормализация URL — это процесс приведения URL к каноническому виду: декодирование %2F → /, удаление ../, схлопывание //, удаление избыточных сегментов. Кэш и сервер часто нормализуют URL по-разному, создавая discrepancy.',
+   898→          why: 'Разница в нормализации — мощный вектор WCD. Если кэш НЕ нормализует /profile%2F..%2Fcss, а сервер декодирует %2F в / и получает /profile/../css → /css → кэширует как статический файл — возникает уязвимость.',
+   899→          where: 'Normalization Discrepancies встречаются повсеместно: URL encoding (%2F, %2E), двойные слеши (//), точка-точка-слеш (../), смешанный регистр. Каждый сервер и CDN обрабатывает их по-своему.',
+   900→          problem: 'Нет единого стандарта нормализации. RFC 3986 определяет синтаксис, но не алгоритм нормализации. Серверы нормализуют по-разному, и кэши тоже.',
+   901→        },
+   902→        theory: {
+   903→          terms: [
+   904→            { term: 'URL Encoding', definition: 'Кодирование спецсимволов в URL: %2F = /, %2E = ., %3B = ;, %3F = ?. Не все серверы декодируют одинаково.' },
+   905→            { term: 'Path Normalization', definition: 'Приведение пути к каноническому виду: /a/../b → /b, /a//b → /a/b, /a/./b → /a/b.' },
+   906→            { term: 'Double Encoding', definition: 'Двойное кодирование: %252F = %2F (после первого декодирования) = / (после второго). Сервер может декодировать дважды, а кэш — один раз.' },
+   907→          ],
+   908→          principles: `## Принципы Normalization Discrepancies
+   909→
+   910→Основные типы несоответствий:
+   911→
+   912→1. **URL Encoding discrepancy**: Кэш декодирует %2E%2E%2F в ../, а сервер — нет (или наоборот)
+   913→2. **Path traversal normalization**: Кэш сохраняет /a/../b как есть, а сервер нормализует в /b
+   914→3. **Double slash**: Кэш различает /a//b и /a/b, а сервер — нет
+   915→4. **Case sensitivity**: Кэш чувствителен к регистру, а сервер — нет
+   916→
+   917→Каждое несоответствие может быть использовано для WCD: кэш формирует один ключ, а сервер обрабатывает другой путь.`,
+   918→          architecture: `## Примеры несоответствий нормализации
+   919→
+   920→**/profile%2Fcss** — Кэш видит как есть, сервер декодирует %2F в / и получает /profile/css. Риск: **высокий** — прямая несогласованность между кодированным и декодированным путём.
+   921→
+   922→**/static/..%2Fprofile** — Кэш не нормализует %2F и видит /static/ в начале, сервер декодирует и получает /profile. Риск: **высокий** — обход правила директории.
+   923→
+   924→**/PROFILE.CSS** — Кэш различает регистр, сервер приводит к нижнему регистру и видит /profile.css. Риск: **средний** — зависит от чувствительности кэша к регистру.
+   925→
+   926→**/a//b** — Кэш различает двойные слеши, сервер схлопывает в /a/b. Риск: **низкий** — большинство современных серверов нормализуют //.`,
+   927→          connections: `Normalization связана с Path Mapping (нормализация при маппинге) и Delimiter Discrepancies (декодирование разделителей).`,
+   928→        },
+   929→        diagram: {
+   930→          type: 'comparison',
+   931→          title: 'Normalization: разные результаты',
+   932→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 220" fill="none">
+   933→  <defs><filter id="nmf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+   934→  <rect x="20" y="65" width="240" height="60" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#nmf)"/>
+   935→  <text x="140" y="90" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">/static/..%2Fprofile</text>
+   936→  <text x="140" y="110" text-anchor="middle" fill="#64748b" font-size="10">Исходный URL</text>
+   937→  <rect x="310" y="15" width="200" height="80" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#nmf)"/>
+   938→  <rect x="325" y="27" width="70" height="20" rx="10" fill="#f59e0b" opacity="0.2"/>
+   939→  <text x="360" y="41" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold">КЭШ</text>
+   940→  <text x="410" y="41" text-anchor="middle" fill="#f59e0b" font-size="10">/static/*</text>
+   941→  <text x="410" y="61" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Не нормализует %2F</text>
+   942→  <rect x="345" y="70" width="100" height="18" rx="9" fill="#10b981" opacity="0.2"/>
+   943→  <text x="395" y="83" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">КЭШИРОВАТЬ</text>
+   944→  <rect x="310" y="115" width="200" height="80" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#nmf)"/>
+   945→  <rect x="325" y="127" width="70" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+   946→  <text x="360" y="141" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">СЕРВЕР</text>
+   947→  <text x="410" y="141" text-anchor="middle" fill="#ef4444" font-size="10">Декодирует %2F</text>
+   948→  <text x="410" y="161" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">/static/../profile</text>
+   949→  <rect x="345" y="168" width="100" height="18" rx="9" fill="#ef4444" opacity="0.2"/>
+   950→  <text x="395" y="181" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">/profile</text>
+   951→  <rect x="555" y="65" width="125" height="80" rx="16" fill="#ef4444" opacity="0.1" stroke="#ef4444" stroke-width="2" filter="url(#nmf)"/>
+   952→  <text x="617" y="95" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">УТЕЧКА!</text>
+   953→  <text x="617" y="115" text-anchor="middle" fill="#ef4444" font-size="9">Профиль</text>
+   954→  <text x="617" y="130" text-anchor="middle" fill="#ef4444" font-size="9">в кэше</text>
+   955→</svg>`,
+   956→        },
+   957→        practicalExamples: [
+   958→          {
+   959→            title: 'WCD через URL Encoding discrepancy',
+   960→            description: 'Использование %2F для обхода правил кэша',
+   961→            code: `# Атакующий использует закодированный path traversal
+   962→GET /static/..%2Fprofile HTTP/1.1
+   963→Host: vulnerable.com
+   964→Cookie: session=attacker
+   965→
+   966→# Кэш: видит /static/ в начале → кэшировать
+   967→# Ключ: /static/..%2Fprofile (НЕ нормализует)
+   968→
+   969→# Сервер: декодирует %2F → /static/../profile
+   970→# Нормализует → /profile → динамический!
+   971→
+   972→# Жертва запрашивает /static/..%2Fprofile
+   973→# Кэш: HIT → данные атакующего!`,
+   974→            language: 'http',
+   975→          },
+   976→        ],
+   977→        sandboxes: [
+   978→          { type: 'encoding-lab', title: 'Лаборатория кодирования URL', description: 'Кодируйте и декодируйте URL разными способами. Наблюдайте, как кэш и сервер обрабатывают %2F, %2E, %252F по-разному.' },
+   979→        ],
+   980→        commonMistakes: [
+   981→          { mistake: 'Думать, что URL encoding всегда декодируется одинаково', explanation: 'Разные серверы декодируют на разных этапах: Nginx — один раз, PHP — дважды, Node.js — по-разному.', correctApproach: 'Тестируйте каждый сервер отдельно, проверяйте одинарное и двойное декодирование.' },
+   982→        ],
+   983→        furtherReading: [
+   984→          { topic: 'Cache Defenses', slug: 'cache-defenses-overview', categorySlug: 'cache-defenses' },
+   985→          { topic: 'Path Mapping', slug: 'path-mapping-overview', categorySlug: 'path-mapping' },
+   986→        ],
+   987→      },
+   988→    ],
+   989→  },
+   990→  {
+   991→    slug: 'file-name-rules',
+   992→    title: 'File Name Rules',
+   993→    description: 'Правила обработки имён файлов в кэше и их обход: двойные расширения, null bytes',
+   994→    iconName: 'FileText',
+   995→    subtopics: [
+   996→      {
+   997→        slug: 'file-name-rules-overview',
+   998→        title: 'Правила имён файлов в кэше',
+   999→        categorySlug: 'file-name-rules',
+  1000→        introduction: {
+  1001→          what: 'File Name Rules — это правила, по которым кэш определяет тип файла по его имени: расширению, позиции точки, наличию спецсимволов. Кэш решает: .css → кэшировать, .php → не кэшировать. Но что если файл называется profile.css.php? Или profile.css%00.png?',
+  1002→          why: 'Нестандартные имена файлов создают несоответствия между кэшем и сервером. Кэш может видеть одно расширение, а сервер — другое. Двойные расширения, null bytes и нестандартные символы — все они могут обмануть кэш.',
+  1003→          where: 'File Name Rules применяются во всех CDN и reverse proxy. Cloudflare проверяет последнее расширение, Nginx — первое, Apache — оба. Эта разница создаёт уязвимости.',
+  1004→          problem: 'Главная проблема: нет стандарта, какое расширение считать "главным". Для profile.css.php кэш может видеть .php (не кэшировать) или .css (кэшировать), в зависимости от реализации.',
+  1005→        },
+  1006→        theory: {
+  1007→          terms: [
+  1008→            { term: 'Double Extension', definition: 'Файл с двумя расширениями: profile.css.php, image.png.html. Кэш и сервер могут по-разному определять, какое расширение главное.' },
+  1009→            { term: 'Null Byte', definition: 'Нулевой байт (%00 или \\0) обрезает строку в некоторых серверах. profile.css%00.php может восприниматься как profile.css сервером и profile.css%00.php кэшем.' },
+  1010→            { term: 'Extension Priority', definition: 'Порядок проверки расширений: первое (слева), последнее (справа), или все. Разные кэши используют разные подходы.' },
+  1011→          ],
+  1012→          principles: `## Принципы File Name Rules
+  1013→
+  1014→Кэш проверяет расширение по-разному:
+  1015→1. **Последнее расширение** (Cloudflare): profile.css.php → .php → НЕ кэшировать
+  1016→2. **Первое расширение** (некоторые Nginx): profile.css.php → .css → кэшировать
+  1017→3. **Любое расширение** (агрессивные кэши): если есть .css → кэшировать
+  1018→
+  1019→**Двойное расширение** для WCD:
+  1020→- /profile.css.php — если кэш проверяет первое расширение (.css) → кэшировать
+  1021→- Сервер обрабатывает как .php → динамический контент
+  1022→
+  1023→**Null byte** для WCD:
+  1024→- /profile.css%00.png — сервер обрезает на %00 → profile.css
+  1025→- Кэш видит .png → кэшировать`,
+  1026→          architecture: `## Приоритет расширений в разных кэшах
+  1027→
+  1028→**Cloudflare** — проверяет последнее расширение. Для a.css.php видит .php и пропускает. Надёжный подход, но не защищает от всех векторов.
+  1029→
+  1030→**Nginx** — определяет тип по MIME-типу ответа. Для a.css.php результат зависит от конфигурации: если сервер возвращает text/css, Nginx может кэшировать.
+  1031→
+  1032→**Akamai** — настраиваемые правила. Поведение полностью зависит от конфигурации клиента. Можно задать приоритет расширений вручную.
+  1033→
+  1034→**Varnish** — полный контроль через VCL. Администратор сам определяет, какие расширения кэшировать. Самый гибкий, но и самый сложный подход.`,
+  1035→          connections: `File Name Rules связаны со Static Extension Rules (расширения определяют кэширование) и Delimiter Discrepancies (как отделить расширение от пути).`,
+  1036→        },
+  1037→        diagram: {
+  1038→          type: 'comparison',
+  1039→          title: 'Двойное расширение: разные интерпретации',
+  1040→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 180" fill="none">
+  1041→  <defs><filter id="fnf"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter></defs>
+  1042→  <rect x="20" y="50" width="220" height="60" rx="16" fill="#3b82f6" opacity="0.08" stroke="#3b82f6" stroke-width="1.5" filter="url(#fnf)"/>
+  1043→  <text x="130" y="78" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">profile.css.php</text>
+  1044→  <text x="130" y="98" text-anchor="middle" fill="#64748b" font-size="10">Двойное расширение</text>
+  1045→  <rect x="290" y="10" width="180" height="65" rx="16" fill="#10b981" opacity="0.08" stroke="#10b981" stroke-width="1.5" filter="url(#fnf)"/>
+  1046→  <rect x="305" y="22" width="70" height="20" rx="10" fill="#10b981" opacity="0.2"/>
+  1047→  <text x="340" y="36" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold">Nginx</text>
+  1048→  <text x="380" y="36" text-anchor="middle" fill="#10b981" font-size="10">.css</text>
+  1049→  <text x="380" y="56" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">Первое расширение</text>
+  1050→  <rect x="305" y="48" width="70" height="18" rx="9" fill="#10b981" opacity="0.2"/>
+  1051→  <text x="340" y="60" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold">КЭШИРОВАТЬ</text>
+  1052→  <rect x="290" y="95" width="180" height="65" rx="16" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" filter="url(#fnf)"/>
+  1053→  <rect x="305" y="107" width="70" height="20" rx="10" fill="#ef4444" opacity="0.2"/>
+  1054→  <text x="340" y="121" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">CF</text>
+  1055→  <text x="380" y="121" text-anchor="middle" fill="#ef4444" font-size="10">.php</text>
+  1056→  <text x="380" y="141" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">Последнее расширение</text>
+  1057→  <rect x="305" y="133" width="70" height="18" rx="9" fill="#ef4444" opacity="0.2"/>
+  1058→  <text x="340" y="145" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="bold">ПРОПУСК</text>
+  1059→  <rect x="520" y="40" width="160" height="80" rx="16" fill="#f59e0b" opacity="0.08" stroke="#f59e0b" stroke-width="1.5" filter="url(#fnf)"/>
+  1060→  <text x="600" y="68" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">Результат зависит</text>
+  1061→  <text x="600" y="88" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">от кэша!</text>
+  1062→  <text x="600" y="108" text-anchor="middle" fill="#64748b" font-size="9">Нет единого стандарта</text>
+  1063→</svg>`,
+  1064→        },
+  1065→        practicalExamples: [
+  1066→          {
+  1067→            title: 'WCD через двойное расширение',
+  1068→            description: 'Использование .css.php для обмана кэша',
+  1069→            code: `# Атакующий: /profile.css.php
+  1070→# Кэш (Nginx): первое расширение .css → кэшировать
+  1071→# Сервер: обрабатывает как .php → динамический профиль
+  1072→
+  1073→GET /profile.css.php HTTP/1.1
+  1074→Host: vulnerable.com
+  1075→Cookie: session=attacker
+  1076→
+  1077→# Сервер: /profile → профиль атакующего
+  1078→# Кэш: .css → сохраняет!
+  1079→
+  1080→# Жертва:
+  1081→GET /profile.css.php HTTP/1.1
+  1082→Host: vulnerable.com
+  1083→# Кэш: HIT → данные атакующего!`,
+  1084→            language: 'http',
+  1085→          },
+  1086→        ],
+  1087→        sandboxes: [
+  1088→          { type: 'url-parser', title: 'Парсер URL и расширений', description: 'Введите URL с двойными расширениями, null bytes и спецсимволами. Увидьте, как кэш и сервер интерпретируют имя файла.' },
+  1089→        ],
+  1090→        commonMistakes: [
+  1091→          { mistake: 'Думать, что null byte (%00) работает везде', explanation: 'Современные серверы (PHP 5.3.4+, Node.js) обычно обрабатывают null bytes безопасно. Но старые версии уязвимы.', correctApproach: 'Тестируйте null bytes, но не полагайтесь на них как на основной вектор.' },
+  1092→        ],
+  1093→        furtherReading: [
+  1094→          { topic: 'Static Extension Rules', slug: 'static-extension-rules', categorySlug: 'cache-rules' },
+  1095→          { topic: 'Cache Defenses', slug: 'cache-defenses-overview', categorySlug: 'cache-defenses' },
+  1096→        ],
+  1097→      },
+  1098→    ],
+  1099→  },
+  1100→  {
+  1101→    slug: 'cache-defenses',
+  1102→    title: 'Cache Defenses',
+  1103→    description: 'Защита от Web Cache Deception: лучшие практики, настройка заголовков, мониторинг',
+  1104→    iconName: 'ShieldCheck',
+  1105→    subtopics: [
+  1106→      {
+  1107→        slug: 'cache-defenses-overview',
+  1108→        title: 'Защита от Web Cache Deception',
+  1109→        categorySlug: 'cache-defenses',
+  1110→        introduction: {
+  1111→          what: 'Защита от Web Cache Deception — это набор мер, которые предотвращают или минимизируют утечки данных через кэш. Основная идея: убедиться, что динамический и персональный контент никогда не попадает в кэш, независимо от того, как выглядит URL.',
+  1112→          why: 'Без защиты WCD может привести к утечке персональных данных: email, API-ключи, токены сессий, финансовая информация. Даже одна утечка может скомпрометировать тысячи пользователей, если кэш отдаёт данные каждому посетителю.',
+  1113→          where: 'Защита должна применяться на всех уровнях: сервер (заголовки), CDN (правила), приложение (архитектура), мониторинг (обнаружение). Комплексный подход — единственный надёжный способ.',
+  1114→          problem: 'Главная проблема: многие разработчики не знают о WCD и не настраивают защиту. Даже если сервер отправляет правильные заголовки, CDN может переопределить их своими правилами.',
+  1115→        },
+  1116→        theory: {
+  1117→          terms: [
+  1118→            { term: 'Cache-Control: no-store', definition: 'Директива, полностью запрещающая кэшу сохранять ответ. Это первая линия защиты: все динамические ответы должны иметь этот заголовок.' },
+  1119→            { term: 'Vary: Cookie', definition: 'Заголовок, добавляющий Cookie в Cache Key. Если Vary: Cookie, кэш создаст разные записи для авторизованных и неавторизованных пользователей.' },
+  1120→            { term: 'Key Normalization', definition: 'Нормализация ключа кэша: приведение URL к единому виду перед формированием ключа. Предотвращает discrepancy через кодирование.' },
+  1121→          ],
+  1122→          terms: [
+  1123→            { term: 'Cache-Control: no-store', definition: 'Директива, полностью запрещающая кэшу сохранять ответ. Это первая линия защиты.' },
+  1124→            { term: 'Vary: Cookie', definition: 'Добавляет Cookie в Cache Key. Разные сессии = разные кэши.' },
+  1125→            { term: 'Autonomous Key', definition: 'Ключ кэша, включающий все значимые компоненты: путь, cookie, заголовки авторизации.' },
+  1126→          ],
+  1127→          principles: `## Принципы защиты от WCD
+  1128→
+  1129→**1. Никогда не кэшируйте динамический контент**
+  1130→Все API-эндпоинты и персональные страницы должны иметь Cache-Control: no-store, private. Это простейшее и самое надёжное правило.
+  1131→
+  1132→**2. Используйте Vary: Cookie**
+  1133→Если контент зависит от сессии, Vary: Cookie создаст отдельные записи кэша для каждого пользователя. Даже если кэш решит кэшировать, каждый пользователь получит свой контент.
+  1134→
+  1135→**3. Нормализуйте ключи кэша**
+  1136→Настройте CDN на нормализацию URL перед формированием ключа: декодировать %2F → /, удалить ../, схлопнуть //. Это устраняет discrepancy.
+  1137→
+  1138→**4. Разделяйте статический и динамический контент**
+  1139→Используйте разные домены или пути: static.example.com для файлов, app.example.com для API. Кэшируйте только static.
+  1140→
+  1141→**5. Мониторинг**
+  1142→Отслеживайте X-Cache: HIT на динамических страницах. Если API-эндпоинт возвращает HIT — это признак уязвимости.`,
+  1143→          architecture: `## Контрмеры по уровню
+  1144→
+  1145→**Сервер** — Cache-Control: no-store для всех динамических эндпоинтов. Это первая и самая надёжная линия защиты.
+  1146→
+  1147→**CDN** — Настройка правил: не кэшировать /api/*. Cloudflare Page Rules, Akamai Property Manager — все поддерживают такие правила.
+  1148→
+  1149→**Приложение** — Разделение доменов: api.site.com для динамики, static.site.com для статики. Разные домены = изолированные кэши.
+  1150→
+  1151→**Кэш** — Vary: Cookie для всех авторизованных ответов. Разные сессии = разные записи кэша.
+  1152→
+  1153→**Мониторинг** — Отслеживание X-Cache: HIT на API-эндпоинтах. Если динамический контент кэшируется — это инцидент.`,
+  1154→          connections: `Защита опирается на понимание всех предыдущих тем: Cache Keys (ключи), Cache Rules (правила), Discrepancies (несоответствия). Каждая мера закрывает конкретный вектор атаки.`,
+  1155→        },
+  1156→        diagram: {
+  1157→          type: 'architecture',
+  1158→          title: 'Многоуровневая защита от WCD',
+  1159→          svgContent: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" fill="none">
+  1160→  <defs>
+  1161→    <filter id="df1"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+  1162→    <linearGradient id="d1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#10b981" stop-opacity="0.15"/><stop offset="100%" stop-color="#10b981" stop-opacity="0.03"/></linearGradient>
+  1163→    <linearGradient id="d2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0.03"/></linearGradient>
+  1164→    <linearGradient id="d3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.15"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0.03"/></linearGradient>
+  1165→    <linearGradient id="d4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.03"/></linearGradient>
+  1166→    <linearGradient id="d5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.15"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0.03"/></linearGradient>
+  1167→  </defs>
+  1168→  <rect x="80" y="8" width="540" height="48" rx="14" fill="url(#d1)" stroke="#10b981" stroke-width="1.5" filter="url(#df1)"/>
+  1169→  <rect x="92" y="18" width="28" height="28" rx="14" fill="#10b981" opacity="0.2"/>
+  1170→  <text x="106" y="37" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">1</text>
+  1171→  <text x="350" y="30" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">Cache-Control: no-store, private</text>
+  1172→  <text x="350" y="46" text-anchor="middle" fill="#64748b" font-size="9">Запрет кэширования динамического контента</text>
+  1173→  <rect x="80" y="68" width="540" height="48" rx="14" fill="url(#d2)" stroke="#3b82f6" stroke-width="1.5" filter="url(#df1)"/>
+  1174→  <rect x="92" y="78" width="28" height="28" rx="14" fill="#3b82f6" opacity="0.2"/>
+  1175→  <text x="106" y="97" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">2</text>
+  1176→  <text x="350" y="90" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">Vary: Cookie + Authorization</text>
+  1177→  <text x="350" y="106" text-anchor="middle" fill="#64748b" font-size="9">Разные сессии = разные записи кэша</text>
+  1178→  <rect x="80" y="128" width="540" height="48" rx="14" fill="url(#d3)" stroke="#f59e0b" stroke-width="1.5" filter="url(#df1)"/>
+  1179→  <rect x="92" y="138" width="28" height="28" rx="14" fill="#f59e0b" opacity="0.2"/>
+  1180→  <text x="106" y="157" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">3</text>
+  1181→  <text x="350" y="150" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">Нормализация ключей кэша</text>
+  1182→  <text x="350" y="166" text-anchor="middle" fill="#64748b" font-size="9">Декодирование %2F, удаление ../, схлопывание //</text>
+  1183→  <rect x="80" y="188" width="540" height="48" rx="14" fill="url(#d4)" stroke="#8b5cf6" stroke-width="1.5" filter="url(#df1)"/>
+  1184→  <rect x="92" y="198" width="28" height="28" rx="14" fill="#8b5cf6" opacity="0.2"/>
+  1185→  <text x="106" y="217" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="bold">4</text>
+  1186→  <text x="350" y="210" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="bold">Разделение доменов</text>
+  1187→  <text x="350" y="226" text-anchor="middle" fill="#64748b" font-size="9">api.site.com и static.site.com — изолированные кэши</text>
+  1188→  <rect x="80" y="248" width="540" height="42" rx="14" fill="url(#d5)" stroke="#ef4444" stroke-width="1" filter="url(#df1)"/>
+  1189→  <rect x="92" y="256" width="28" height="26" rx="14" fill="#ef4444" opacity="0.2"/>
+  1190→  <text x="106" y="274" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">5</text>
+  1191→  <text x="350" y="274" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">Мониторинг X-Cache: HIT на динамических эндпоинтах</text>
+  1192→</svg>`,
+  1193→        },
+  1194→        practicalExamples: [
+  1195→          {
+  1196→            title: 'Правильная настройка заголовков для защиты',
+  1197→            description: 'Примеры безопасных заголовков для разных типов контента',
+  1198→            code: `# Динамический API — НЕ кэшировать
+  1199→HTTP/1.1 200 OK
+  1200→Cache-Control: no-store, private
+  1201→Vary: Cookie, Authorization
+  1202→Content-Type: application/json
+  1203→
+  1204→# Статический файл — кэшировать агрессивно
+  1205→HTTP/1.1 200 OK
+  1206→Cache-Control: public, max-age=31536000, immutable
+  1207→Content-Type: text/css
+  1208→
+  1209→# Персонализированная страница — не кэшировать в CDN
+  1210→HTTP/1.1 200 OK
+  1211→Cache-Control: no-cache, private
+  1212→Vary: Cookie
+  1213→Content-Type: text/html`,
+  1214→            language: 'http',
+  1215→          },
+  1216→        ],
+  1217→        sandboxes: [
+  1218→          { type: 'cache-defense-lab', title: 'Лаборатория защиты от WCD', description: 'Настройте Cache-Control, Vary и правила CDN. Проверьте, защищён ли ваш сайт от WCD-атак.' },
+  1219→        ],
+  1220→        commonMistakes: [
+  1221→          { mistake: 'Думать, что Cache-Control: no-cache достаточно', explanation: 'no-cache разрешает хранение, только требует проверки. no-store полностью запрещает хранение.', correctApproach: 'Используйте no-store для всех API и персональных страниц.' },
+  1222→          { mistake: 'Полагаться только на один уровень защиты', explanation: 'CDN может игнорировать Cache-Control. Нужен комплексный подход.', correctApproach: 'Настраивайте защиту на сервере И в CDN И в мониторинге.' },
+  1223→        ],
+  1224→        furtherReading: [
+  1225→          { topic: 'Web Caches', slug: 'what-is-web-cache', categorySlug: 'web-caches' },
+  1226→          { topic: 'Cache Keys', slug: 'what-are-cache-keys', categorySlug: 'cache-keys' },
+  1227→        ],
+  1228→      },
+  1229→    ],
+  1230→  },
+  1231→];
+  1232→

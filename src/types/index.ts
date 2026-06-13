@@ -17,11 +17,108 @@ export interface SubtopicTheory {
   connections: string;
 }
 
-export interface DiagramData {
-  type: 'flowchart' | 'architecture' | 'pipeline' | 'comparison';
-  title: string;
-  svgContent: string;
+/* ─── Diagram Types ─── */
+
+export type DiagramNodeRole = 'input' | 'process' | 'decision' | 'output' | 'danger' | 'success' | 'warning' | 'neutral';
+
+// Split Flow — canonical WCD diagram showing cache vs origin divergence
+export interface SplitFlowStep {
+  label: string;
+  detail?: string;
+  role: DiagramNodeRole;
 }
+
+export interface SplitFlowBranch {
+  label: string;
+  subtitle?: string;
+  steps: SplitFlowStep[];
+}
+
+export interface SplitFlowDiagramData {
+  type: 'split-flow';
+  title: string;
+  input: { label: string; subtitle?: string; url?: string };
+  leftBranch: SplitFlowBranch;
+  rightBranch: SplitFlowBranch;
+  conclusion?: { left: string; right: string; highlight: string };
+}
+
+// Processing Flow — sequential flow with decisions
+export interface ProcessingFlowStep {
+  label: string;
+  detail?: string;
+  role: DiagramNodeRole;
+  branchLabel?: string;
+}
+
+export interface ProcessingFlowDiagramData {
+  type: 'processing-flow';
+  title: string;
+  steps: ProcessingFlowStep[];
+}
+
+// Dependency Graph — hierarchical tree
+export interface DependencyNode {
+  label: string;
+  detail?: string;
+  children?: DependencyNode[];
+}
+
+export interface DependencyGraphData {
+  type: 'dependency-graph';
+  title: string;
+  root: DependencyNode;
+}
+
+// Cause → Effect chain
+export interface CauseEffectStep {
+  label: string;
+  detail?: string;
+  role: 'cause' | 'effect' | 'danger';
+}
+
+export interface CauseEffectData {
+  type: 'cause-effect';
+  title: string;
+  steps: CauseEffectStep[];
+}
+
+// Attack Tree
+export interface AttackTreeBranch {
+  label: string;
+  items: string[];
+}
+
+export interface AttackTreeData {
+  type: 'attack-tree';
+  title: string;
+  root: string;
+  branches: AttackTreeBranch[];
+}
+
+// Knowledge Map — interconnected topics
+export interface KnowledgeMapTopic {
+  label: string;
+  children?: string[];
+}
+
+export interface KnowledgeMapData {
+  type: 'knowledge-map';
+  title: string;
+  center: string;
+  topics: KnowledgeMapTopic[];
+}
+
+// Union type for all diagrams
+export type DiagramData =
+  | SplitFlowDiagramData
+  | ProcessingFlowDiagramData
+  | DependencyGraphData
+  | CauseEffectData
+  | AttackTreeData
+  | KnowledgeMapData;
+
+/* ─── End Diagram Types ─── */
 
 export interface PracticalExample {
   title: string;

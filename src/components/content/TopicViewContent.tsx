@@ -14,6 +14,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { WcdSandbox } from '@/components/sandbox/WcdSandbox';
+import { DiagramRenderer } from '@/components/diagrams/DiagramRenderer';
 
 function SectionTitle({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
@@ -102,10 +103,7 @@ export function TopicViewContent({ subtopic }: { subtopic: Subtopic }) {
         </CardHeader>
         <CardContent>
           <h4 className="font-semibold text-xl mb-3">{subtopic.diagram.title}</h4>
-          <div
-            className="w-full overflow-x-auto"
-            dangerouslySetInnerHTML={{ __html: subtopic.diagram.svgContent }}
-          />
+          <DiagramRenderer data={subtopic.diagram} />
         </CardContent>
       </Card>
 
