@@ -2,7 +2,7 @@
 
 import { Subtopic } from '@/types';
 import {
-  Lightbulb, BookOpen, GitBranch, Code2, AlertTriangle,
+  Lightbulb, BookOpen, Code2, AlertTriangle,
   FlaskConical,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { WcdSandbox } from '@/components/sandbox/WcdSandbox';
-import { DiagramRenderer } from '@/components/diagrams/DiagramRenderer';
 
 function SectionTitle({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
@@ -89,17 +88,6 @@ export function TopicViewContent({ subtopic }: { subtopic: Subtopic }) {
             <h4 className="font-semibold text-xl mb-3">Связи с другими технологиями</h4>
             <MarkdownRenderer content={subtopic.theory.connections} />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Diagram */}
-      <Card>
-        <CardHeader>
-          <SectionTitle icon={GitBranch} title="Визуальная схема" />
-        </CardHeader>
-        <CardContent>
-          <h4 className="font-semibold text-xl mb-3">{subtopic.diagram.title}</h4>
-          <DiagramRenderer data={subtopic.diagram} />
         </CardContent>
       </Card>
 
